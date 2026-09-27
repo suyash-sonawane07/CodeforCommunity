@@ -1,10 +1,11 @@
 """Audit trail routes (PRD §10.1 #17, FR-062)."""
 
-from fastapi import APIRouter, Depends, status
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
-from app.api.deps import require_role
-from app.schemas import AuditLogListResponse, NotImplementedResponse
+from app.api.deps import get_db, require_role
+from app.models import AuditLog
+from app.schemas import AuditLogEntry, AuditLogListResponse
 
 router = APIRouter(prefix="/audit-logs", tags=["audit"])
 
@@ -12,10 +13,25 @@ router = APIRouter(prefix="/audit-logs", tags=["audit"])
 @router.get(
     "",
     response_model=AuditLogListResponse,
-    responses={501: {"model": NotImplementedResponse}},
     summary="Audit trail (admin)",
 )
-def list_audit_logs(user=Depends(require_role("admin"))) -> JSONResponse:
-    """TODO(PRD FR-062): read audit_logs with filters."""
-    payload = NotImplementedResponse().model_dump()
-    return JSONResponse(status_code=status.HTTP_501_NOT_IMPLEMENTED, content=payload)
+def list_audit_logs(
+    db: Session = Depends(get_db),
+    user=Depends(require_role("admin")),
+) -> AuditLogListResponse:
+    """Returns an immutable audit log trail for governance and review actions (FR-062)."""
+    logs = db.query(AuditLog).order_by(AuditLog.id.desc()).limit(100).all()
+    items = [
+        AuditLogEntry(
+            id=entry.id,
+            actor_id=entry.actor_id,
+            action=entry.action,
+            entity_type=entry.entity_type,
+            entity_id=entry.entity_id,
+            before_value=entry.before_value,
+            after_value=entry.after_value,
+            created_at=entry.created_at.isoformat() if entry.created_at else None,
+        )
+        for entry in logs
+    ]
+    return AuditLogListResponse(items=items, total=len(items))

@@ -4,6 +4,14 @@ SCAFFOLD ONLY: /health, /, /version are implemented; all PRD business endpoints
 (PRD §10.1) are exposed with real schemas and return 501 until implemented.
 """
 
+import sys
+from pathlib import Path
+
+# Ensure root (containing ai/ layer) is on sys.path
+_root_dir = str(Path(__file__).resolve().parents[2])
+if _root_dir not in sys.path:
+    sys.path.insert(0, _root_dir)
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -31,8 +39,8 @@ app = FastAPI(
     title=f"{settings.APP_NAME} API",
     version=settings.APP_VERSION,
     description=(
-        "AI Development-Needs Intelligence Layer — **SCAFFOLD**. "
-        "Business endpoints return 501 NOT_IMPLEMENTED until built. "
+        "AI Development-Needs Intelligence Layer — Code for Communities 2.0 Track 1. "
+        "Intake, Multilingual NLP, Clustering, Geospatial, Evidence, Gap Detection, and Policy Simulation. "
         "Contract: docs/api/API_CONTRACT.md"
     ),
     openapi_url="/openapi.json",

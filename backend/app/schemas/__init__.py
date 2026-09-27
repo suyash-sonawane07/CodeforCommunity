@@ -1,9 +1,9 @@
 """API schema package — re-export the contract models."""
 
 from app.schemas.api import (
+    AudioUploadResponse,
     AuditLogEntry,
     AuditLogListResponse,
-    AudioUploadResponse,
     ClusterCorrection,
     ClusterDetail,
     ClusterListResponse,
@@ -13,9 +13,9 @@ from app.schemas.api import (
     ErrorBody,
     ErrorEnvelope,
     EvidencePanel,
+    GapAnalysisResult,
     GeoJSONFeature,
     GeoJSONFeatureCollection,
-    GapAnalysisResult,
     HealthResponse,
     InfrastructureLayerResponse,
     LoginRequest,

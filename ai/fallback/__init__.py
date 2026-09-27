@@ -17,15 +17,18 @@ STT_PROVIDERS: dict[str, Callable[[], Any]] = {
 
 LANGUAGE_PROVIDERS: dict[str, Callable[[], Any]] = {
     "mock": lambda: _nlp().MockLanguageDetector(),
+    "rule_based": lambda: _nlp().RuleBasedLanguageDetector(),
 }
 
 LLM_PROVIDERS: dict[str, Callable[[], Any]] = {
     "mock": lambda: _nlp().MockTextNormalizer(),  # LLM choice TBD (PRD §11)
+    "rule_based": lambda: _nlp().RuleBasedTextNormalizer(),
 }
 
 EMBEDDING_PROVIDERS: dict[str, Callable[[], Any]] = {
     "mock": lambda: _emb().MockEmbeddingProvider(),
     "tfidf": lambda: _emb().TfidfEmbeddingProvider(),
+    "rule_based": lambda: _emb().RuleBasedEmbeddingProvider(),
 }
 
 GEOCODING_PROVIDERS: dict[str, Callable[[], Any]] = {
@@ -36,9 +39,11 @@ GEOCODING_PROVIDERS: dict[str, Callable[[], Any]] = {
 
 _CLASSIFIER_FACTORIES = {
     "mock": lambda: _nlp().MockIssueClassifier(),
+    "rule_based": lambda: _nlp().RuleBasedIssueClassifier(),
 }
 _EXTRACTOR_FACTORIES = {
     "mock": lambda: _nlp().MockEntityExtractor(),
+    "rule_based": lambda: _nlp().RuleBasedEntityExtractor(),
 }
 
 

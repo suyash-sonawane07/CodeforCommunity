@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "CivicPulse API",
-    "description": "AI Development-Needs Intelligence Layer \u2014 **SCAFFOLD**. Business endpoints return 501 NOT_IMPLEMENTED until built. Contract: docs/api/API_CONTRACT.md",
+    "description": "AI Development-Needs Intelligence Layer \u2014 Code for Communities 2.0 Track 1. Intake, Multilingual NLP, Clustering, Geospatial, Evidence, Gap Detection, and Policy Simulation. Contract: docs/api/API_CONTRACT.md",
     "version": "0.1.0"
   },
   "paths": {
@@ -63,7 +63,7 @@
           "requests"
         ],
         "summary": "Submit a citizen request (text or voice) \u2014 FR-001/002",
-        "description": "TODO(PRD FR-001\u2013009, Member B Phase 1): persist intake, run STT/langdetect pipeline.",
+        "description": "Intake endpoint: runs STT, language detection, classification, NER, geocoding and clustering.",
         "operationId": "create_request_requests_post",
         "requestBody": {
           "content": {
@@ -115,7 +115,7 @@
           "requests"
         ],
         "summary": "Upload/attach audio for transcription \u2014 FR-002",
-        "description": "TODO(PRD FR-002): file-type/size validation then storage; STT stays behind provider.",
+        "description": "Accepts citizen audio recording, runs speech transcription and links to citizen request.",
         "operationId": "upload_audio_requests__request_id__audio_post",
         "parameters": [
           {
@@ -149,16 +149,6 @@
               }
             }
           },
-          "501": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotImplementedResponse"
-                }
-              }
-            },
-            "description": "Not Implemented"
-          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -178,7 +168,7 @@
           "requests"
         ],
         "summary": "Citizen checks own submission status (reference ID) \u2014 FR-005",
-        "description": "TODO(PRD FR-005): return status for the caller's own submission only.",
+        "description": "Look up submission status by reference code or ID.",
         "operationId": "get_request_requests__request_id__get",
         "parameters": [
           {
@@ -202,16 +192,6 @@
               }
             }
           },
-          "501": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotImplementedResponse"
-                }
-              }
-            },
-            "description": "Not Implemented"
-          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -231,8 +211,79 @@
           "clusters"
         ],
         "summary": "List clusters, filterable by sector/district/status \u2014 FR-071 (analyst+)",
-        "description": "TODO(PRD FR-019\u2013025, FR-071, Phase 2): query needs_clusters with filters.",
+        "description": "List clusters with multi-factor filtering.",
         "operationId": "list_clusters_clusters_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sector",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sector"
+            }
+          },
+          {
+            "name": "issue_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Issue Type"
+            }
+          },
+          {
+            "name": "district",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "District"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -244,22 +295,17 @@
               }
             }
           },
-          "501": {
-            "description": "Not Implemented",
+          "422": {
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NotImplementedResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
           }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        }
       }
     },
     "/clusters/{cluster_id}": {
@@ -296,16 +342,6 @@
               }
             }
           },
-          "501": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotImplementedResponse"
-                }
-              }
-            },
-            "description": "Not Implemented"
-          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -323,7 +359,6 @@
           "clusters"
         ],
         "summary": "Correct classification/location \u2014 FR-060 (reviewer+)",
-        "description": "TODO(PRD FR-060, FR-062, Phase 3): apply correction, write review_action + audit_log.",
         "operationId": "correct_cluster_clusters__cluster_id__patch",
         "security": [
           {
@@ -362,74 +397,6 @@
               }
             }
           },
-          "501": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotImplementedResponse"
-                }
-              }
-            },
-            "description": "Not Implemented"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/clusters/{cluster_id}/evidence": {
-      "get": {
-        "tags": [
-          "clusters"
-        ],
-        "summary": "Evidence panel payload \u2014 FR-051 (analyst+)",
-        "description": "TODO(PRD FR-051\u2013052, Phase 2): assemble traceable evidence snapshot.",
-        "operationId": "get_evidence_clusters__cluster_id__evidence_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "cluster_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Cluster Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EvidencePanel"
-                }
-              }
-            }
-          },
-          "501": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotImplementedResponse"
-                }
-              }
-            },
-            "description": "Not Implemented"
-          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -449,7 +416,6 @@
           "clusters"
         ],
         "summary": "Approve/reject/request-more-evidence \u2014 FR-059 (reviewer+)",
-        "description": "TODO(PRD FR-058\u2013063, Phase 3): state machine + exactly one audit row per action.",
         "operationId": "review_cluster_clusters__cluster_id__review_post",
         "security": [
           {
@@ -488,15 +454,52 @@
               }
             }
           },
-          "501": {
+          "422": {
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NotImplementedResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
-            },
-            "description": "Not Implemented"
+            }
+          }
+        }
+      }
+    },
+    "/clusters/{cluster_id}/evidence": {
+      "get": {
+        "tags": [
+          "clusters"
+        ],
+        "summary": "Evidence panel payload \u2014 FR-051 (analyst+)",
+        "operationId": "get_evidence_clusters__cluster_id__evidence_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cluster_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Cluster Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvidencePanel"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -517,7 +520,6 @@
           "clusters"
         ],
         "summary": "Gap detection result \u2014 FR-040\u2013044 (analyst+)",
-        "description": "TODO(PRD FR-040\u2013044, Phase 2): call gap_detection service.",
         "operationId": "get_gap_analysis_clusters__cluster_id__gap_analysis_get",
         "security": [
           {
@@ -546,16 +548,6 @@
               }
             }
           },
-          "501": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotImplementedResponse"
-                }
-              }
-            },
-            "description": "Not Implemented"
-          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -575,7 +567,6 @@
           "clusters"
         ],
         "summary": "Priority factor breakdown \u2014 FR-050 (analyst+)",
-        "description": "TODO(PRD FR-045\u2013050, Phase 2): call prioritisation service; no hard-coded weights.",
         "operationId": "get_priority_clusters__cluster_id__priority_get",
         "security": [
           {
@@ -604,16 +595,6 @@
               }
             }
           },
-          "501": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotImplementedResponse"
-                }
-              }
-            },
-            "description": "Not Implemented"
-          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -633,7 +614,7 @@
           "geospatial"
         ],
         "summary": "GeoJSON for map rendering \u2014 FR-029 (analyst+)",
-        "description": "TODO(PRD FR-029, FR-032, FR-033, Phase 2): PostGIS query \u2192 FeatureCollection.",
+        "description": "Returns valid GeoJSON points for clusters. Unresolved locations have geometry: None (FR-021/033).",
         "operationId": "cluster_geojson_geospatial_clusters_get",
         "security": [
           {
@@ -685,16 +666,6 @@
               }
             }
           },
-          "501": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotImplementedResponse"
-                }
-              }
-            },
-            "description": "Not Implemented"
-          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -714,7 +685,7 @@
           "infrastructure"
         ],
         "summary": "Infrastructure/demographic layer query \u2014 FR-030/031 (analyst+)",
-        "description": "TODO(PRD FR-030\u2013031, Phase 2): query curated tables with dataset_version.",
+        "description": "Returns infrastructure assets and demographic indicators alongside dataset provenance (FR-057).",
         "operationId": "infrastructure_layer_infrastructure_get",
         "security": [
           {
@@ -766,16 +737,6 @@
               }
             }
           },
-          "501": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotImplementedResponse"
-                }
-              }
-            },
-            "description": "Not Implemented"
-          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -795,7 +756,7 @@
           "simulations"
         ],
         "summary": "Run a policy what-if scenario \u2014 FR-053\u2013056 (decision_maker+)",
-        "description": "TODO(PRD FR-053\u2013056, Phase 3, Member C logic + B API): deterministic scenario run.",
+        "description": "Executes deterministic scenario planning and returns coverage outcomes.",
         "operationId": "run_simulation_simulations_post",
         "requestBody": {
           "content": {
@@ -814,16 +775,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SimulationResult"
-                }
-              }
-            }
-          },
-          "501": {
-            "description": "Not Implemented",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotImplementedResponse"
                 }
               }
             }
@@ -852,7 +803,7 @@
           "outcomes"
         ],
         "summary": "Outcome measurement view \u2014 FR-064\u2013067 (analyst+)",
-        "description": "TODO(PRD FR-064\u2013067, Phase 3): baseline vs synthetic followup snapshot.",
+        "description": "Returns baseline vs synthetic followup indicators with correlation disclaimer (FR-067).",
         "operationId": "get_outcome_clusters__cluster_id__outcome_get",
         "security": [
           {
@@ -881,16 +832,6 @@
               }
             }
           },
-          "501": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotImplementedResponse"
-                }
-              }
-            },
-            "description": "Not Implemented"
-          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -910,7 +851,7 @@
           "datasets"
         ],
         "summary": "Dataset registry + versions (admin)",
-        "description": "TODO(PRD FR-038/FR-073): read public_datasets.",
+        "description": "Lists registered public datasets with versions and source labels (FR-038).",
         "operationId": "list_datasets_datasets_get",
         "responses": {
           "200": {
@@ -919,16 +860,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DatasetListResponse"
-                }
-              }
-            }
-          },
-          "501": {
-            "description": "Not Implemented",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotImplementedResponse"
                 }
               }
             }
@@ -947,7 +878,7 @@
           "audit"
         ],
         "summary": "Audit trail (admin)",
-        "description": "TODO(PRD FR-062): read audit_logs with filters.",
+        "description": "Returns an immutable audit log trail for governance and review actions (FR-062).",
         "operationId": "list_audit_logs_audit_logs_get",
         "responses": {
           "200": {
@@ -956,16 +887,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AuditLogListResponse"
-                }
-              }
-            }
-          },
-          "501": {
-            "description": "Not Implemented",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotImplementedResponse"
                 }
               }
             }

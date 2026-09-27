@@ -42,11 +42,12 @@ def test_demo_login_issues_role_scoped_token():
     assert body["role"] == "analyst"
     assert body["token_type"] == "bearer"
 
-    # token unlocks the route → still 501 (placeholder), not 401/403
+    # token unlocks the route → 200 OK with real cluster items
     auth = {"Authorization": f"Bearer {body['access_token']}"}
     res = client.get("/clusters", headers=auth)
-    assert res.status_code == 501
-    assert res.json()["error"]["code"] == "NOT_IMPLEMENTED"
+    assert res.status_code == 200
+    assert "items" in res.json()
+    assert "total" in res.json()
 
 
 def test_demo_login_rejects_unknown_user():
@@ -69,13 +70,17 @@ def test_request_creation_requires_consent():
     assert res.status_code == 422  # FR-005: rejected before any business logic
 
 
-def test_business_endpoints_return_501_envelope():
+def test_business_endpoints_return_valid_evidence_panel():
     token = client.post(
         "/auth/login", json={"email": "reviewer@civicpulse.dev", "password": "x"}
     ).json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
     res = client.get("/clusters/1/evidence", headers=headers)
-    assert res.status_code == 501
-    body = res.json()["error"]
-    assert body["code"] == "NOT_IMPLEMENTED"
-    assert "API_CONTRACT" in body["message"]
+    assert res.status_code == 200
+    body = res.json()
+    assert body["cluster_id"] == 1
+    assert "issue_type" in body
+    assert "independent_demand_count" in body
+    assert "priority_factors" in body
+    assert "uncertainty_notes" in body
+

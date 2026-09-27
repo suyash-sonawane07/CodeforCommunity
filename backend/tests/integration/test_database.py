@@ -61,9 +61,8 @@ def test_locations_geometry_column_is_postgis():
 
 
 def test_seed_data_present():
-    from app.models import PublicDataset
-
     from app.db.session import SessionLocal
+    from app.models import PublicDataset
 
     db = SessionLocal()
     try:

@@ -7,7 +7,7 @@ it always (FR-024). `review_status` is deliberately separate from `status` (FR-0
 
 from typing import List, Optional
 
-from sqlalchemy import Float, ForeignKey, Integer, JSON, String
+from sqlalchemy import JSON, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base

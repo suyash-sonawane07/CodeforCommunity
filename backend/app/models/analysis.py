@@ -6,8 +6,7 @@ No algorithm values are hard-coded here — the services (Member C) populate the
 
 from typing import Optional
 
-from sqlalchemy import JSON
-from sqlalchemy import Boolean, Float, ForeignKey, String, Text
+from sqlalchemy import JSON, Boolean, Float, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
