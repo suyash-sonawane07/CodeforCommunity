@@ -37,6 +37,10 @@ jobs:
         run: alembic upgrade head
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
+      - name: Seed database
+        run: python -m app.db.seed
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
       - run: pytest
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
