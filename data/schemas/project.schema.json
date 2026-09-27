@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://civicpulse.local/schemas/project.schema.json",
+  "title": "Synthetic project registry row (FR-037 shape)",
+  "type": "object",
+  "required": ["project_id", "name", "sector", "status", "location"],
+  "properties": {
+    "project_id": { "type": "string" },
+    "name": { "type": "string", "minLength": 3 },
+    "sector": { "enum": ["transport", "water", "health", "education", "roads", "other"] },
+    "status": { "enum": ["sanctioned", "ongoing", "completed"] },
+    "location": {
+      "type": "object",
+      "required": ["state", "district"],
+      "properties": {
+        "state": { "type": "string" },
+        "district": { "type": "string" },
+        "block": { "type": ["string", "null"] },
+        "village_ward": { "type": ["string", "null"] },
+        "latitude": { "type": ["number", "null"], "minimum": -90, "maximum": 90 },
+        "longitude": { "type": ["number", "null"], "minimum": -180, "maximum": 180 }
+      }
+    },
+    "description": { "type": ["string", "null"] },
+    "notes": { "type": "string" }
+  }
+}

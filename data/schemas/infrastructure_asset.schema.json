@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://civicpulse.local/schemas/infrastructure_asset.schema.json",
+  "title": "Synthetic infrastructure asset row (FR-035 shape)",
+  "type": "object",
+  "required": ["asset_id", "asset_type", "name", "location"],
+  "properties": {
+    "asset_id": { "type": "string" },
+    "asset_type": { "enum": ["bus_stop", "school", "clinic", "water_point", "road_segment", "bridge"] },
+    "name": { "type": "string", "minLength": 2 },
+    "location": {
+      "type": "object",
+      "required": ["state", "district"],
+      "properties": {
+        "state": { "type": "string" },
+        "district": { "type": "string" },
+        "block": { "type": ["string", "null"] },
+        "village_ward": { "type": ["string", "null"] },
+        "latitude": { "type": ["number", "null"], "minimum": -90, "maximum": 90 },
+        "longitude": { "type": ["number", "null"], "minimum": -180, "maximum": 180 }
+      }
+    },
+    "attributes": { "type": "object" },
+    "notes": { "type": "string" }
+  }
+}

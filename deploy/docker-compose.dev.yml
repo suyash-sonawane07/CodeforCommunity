@@ -1,0 +1,32 @@
+version: "3.9"
+
+# Development overlay: mounts source for hot reload.
+# Usage: docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml up
+
+services:
+  backend:
+    build:
+      context: ../backend
+      dockerfile: ../deploy/docker/backend.Dockerfile
+    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${BACKEND_PORT:-8000} --reload"
+    volumes:
+      - ../backend/app:/code/app
+      - ../backend/migrations:/code/migrations
+      - ../backend/alembic.ini:/code/alembic.ini
+      - ../backend/tests:/code/tests
+      - ../backend/scripts:/code/scripts
+
+  frontend:
+    command: npm run dev
+    environment:
+      NODE_ENV: development
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - ../frontend/app:/code/app
+      - ../frontend/components:/code/components
+      - ../frontend/lib:/code/lib
+      - ../frontend/hooks:/code/hooks
+      - ../frontend/types:/code/types
+      - ../frontend/services:/code/services
+      - ../frontend/public:/code/public
+      - ../frontend/tests:/code/tests

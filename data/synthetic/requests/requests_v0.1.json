@@ -1,0 +1,45 @@
+{
+  "dataset": "synthetic_citizen_requests",
+  "dataset_version": "synthetic_v0.1",
+  "synthetic": true,
+  "disclaimer": "SYNTHETIC — fabricated for scaffold/demo purposes. Not official government data, not real citizen data, not validated statistics (FR-057).",
+  "description": "4 structurally valid citizen requests: 2 languages, text+voice channels, one low-confidence location to exercise FR-033 later.",
+  "rows": [
+    {
+      "request_id": "req_seed0001",
+      "channel": "text",
+      "language": "hi",
+      "text": "गाँव में शाम 5 बजे के बाद बस नहीं मिलती।",
+      "location_text": "डेमो गाँव 1, डेमो ब्लॉक A",
+      "consent_ack": true,
+      "notes": "Transport-need example (PRD Journey 1/2 analogue)."
+    },
+    {
+      "request_id": "req_seed0002",
+      "channel": "text",
+      "language": "mr",
+      "text": "शाळेत शौचालय नाही, मुलांना अडचण येते.",
+      "location_text": "डेमो गाँव 1, डेमो ब्लॉक A",
+      "consent_ack": true,
+      "notes": "Education-sanitation example; same village as req_seed0001 (clustering candidate)."
+    },
+    {
+      "request_id": "req_seed0003",
+      "channel": "voice",
+      "language": "en",
+      "text": "Water supply comes only two hours a week.",
+      "location_text": "Demo Town 2, Demo Block B",
+      "consent_ack": true,
+      "notes": "Voice-channel stand-in (text transcript stored)."
+    },
+    {
+      "request_id": "req_seed0004",
+      "channel": "text",
+      "language": "en",
+      "text": "The road near the old temple is broken.",
+      "location_text": null,
+      "consent_ack": true,
+      "notes": "No location — must route to needs-geocoding queue later (PRD Journey 9, FR-033)."
+    }
+  ]
+}

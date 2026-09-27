@@ -1,0 +1,6 @@
+# Ruff — ai layer (Python 3.9 compatible)
+line-length = 100
+target-version = "py39"
+
+[lint]
+select = ["E", "F", "I", "W", "UP", "B"]

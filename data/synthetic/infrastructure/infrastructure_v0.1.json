@@ -1,0 +1,54 @@
+{
+  "dataset": "synthetic_infrastructure",
+  "dataset_version": "synthetic_v0.1",
+  "synthetic": true,
+  "disclaimer": "SYNTHETIC — fabricated for scaffold/demo purposes. Not official government data, not real citizen data, not validated statistics (FR-057).",
+  "description": "3 assets across the 2 synthetic locations.",
+  "rows": [
+    {
+      "asset_id": "inf_seed0001",
+      "asset_type": "school",
+      "name": "Demo Village School (synthetic)",
+      "location": {
+        "state": "Demo State",
+        "district": "Demo District 1",
+        "block": "Demo Block A",
+        "village_ward": "Demo Village 1",
+        "latitude": 19.8765,
+        "longitude": 75.344
+      },
+      "attributes": { "facilities": ["classroom"], "facilities_note": "no toilet block" },
+      "notes": "Pairs with req_seed0002 narrative."
+    },
+    {
+      "asset_id": "inf_seed0002",
+      "asset_type": "bus_stop",
+      "name": "Demo Town Bus Stop (synthetic)",
+      "location": {
+        "state": "Demo State",
+        "district": "Demo District 2",
+        "block": "Demo Block B",
+        "village_ward": "Demo Town 2",
+        "latitude": 19.9905,
+        "longitude": 75.181
+      },
+      "attributes": { "routes_served": 2 },
+      "notes": "Proximity exercise for FR-030 later."
+    },
+    {
+      "asset_id": "inf_seed0003",
+      "asset_type": "water_point",
+      "name": "Demo Village Water Point (synthetic)",
+      "location": {
+        "state": "Demo State",
+        "district": "Demo District 1",
+        "block": "Demo Block A",
+        "village_ward": "Demo Village 1",
+        "latitude": 19.8758,
+        "longitude": 75.3425
+      },
+      "attributes": { "functional": true },
+      "notes": "Pairs with req_seed0003 narrative."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+# Ruff — backend lint + format (line length 100)
+line-length = 100
+target-version = "py39"
+
+[lint]
+select = ["E", "F", "I", "W", "UP", "B"]
+ignore = [
+    "B008",  # FastAPI Depends() in defaults is idiomatic
+]
+
+[lint.per-file-ignores]
+# migrations/scripts keep loose style
+"migrations/*" = ["E501"]
+"scripts/*" = ["E501"]
+
+[format]
+quote-style = "double"
+indent-style = "space"

@@ -1,0 +1,41 @@
+{
+  "dataset": "synthetic_projects",
+  "dataset_version": "synthetic_v0.1",
+  "synthetic": true,
+  "disclaimer": "SYNTHETIC — fabricated for scaffold/demo purposes. Not official government data, not real citizen data, not validated statistics (FR-057).",
+  "description": "2 registry rows; when the demo dataset is built, keep one project deliberately overlapping a cluster to demonstrate Journey 10 (FR-042).",
+  "rows": [
+    {
+      "project_id": "prj_seed0001",
+      "name": "Demo Road Upgrade (synthetic)",
+      "sector": "roads",
+      "status": "ongoing",
+      "location": {
+        "state": "Demo State",
+        "district": "Demo District 2",
+        "block": "Demo Block B",
+        "village_ward": "Demo Town 2",
+        "latitude": 19.9902,
+        "longitude": 75.1805
+      },
+      "description": "Ongoing road works near the bus stop.",
+      "notes": "Journey-10 candidate: overlapping project prevents a duplicate gap flag."
+    },
+    {
+      "project_id": "prj_seed0002",
+      "name": "Demo Health Sub-centre Renovation (synthetic)",
+      "sector": "health",
+      "status": "sanctioned",
+      "location": {
+        "state": "Demo State",
+        "district": "Demo District 1",
+        "block": "Demo Block A",
+        "village_ward": "Demo Village 1",
+        "latitude": null,
+        "longitude": null
+      },
+      "description": "Sanctioned renovation, exact siting not yet fixed.",
+      "notes": "Null coordinates exercise null-safe location handling."
+    }
+  ]
+}

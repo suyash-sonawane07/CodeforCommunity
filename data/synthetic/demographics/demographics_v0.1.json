@@ -1,0 +1,37 @@
+{
+  "dataset": "synthetic_demographics",
+  "dataset_version": "synthetic_v0.1",
+  "synthetic": true,
+  "disclaimer": "SYNTHETIC — fabricated for scaffold/demo purposes. Not official government data, not real citizen data, not validated statistics (FR-057).",
+  "description": "Population + deprivation proxy for 2 synthetic locations.",
+  "rows": [
+    {
+      "location": {
+        "state": "Demo State",
+        "district": "Demo District 1",
+        "block": "Demo Block A",
+        "village_ward": "Demo Village 1",
+        "latitude": 19.876,
+        "longitude": 75.343
+      },
+      "population": 2100,
+      "deprivation_index": 0.55,
+      "indicator_name": "seed_example",
+      "notes": "Values chosen for structure, not realism."
+    },
+    {
+      "location": {
+        "state": "Demo State",
+        "district": "Demo District 2",
+        "block": "Demo Block B",
+        "village_ward": "Demo Town 2",
+        "latitude": 19.99,
+        "longitude": 75.18
+      },
+      "population": 8600,
+      "deprivation_index": 0.31,
+      "indicator_name": "seed_example",
+      "notes": "Values chosen for structure, not realism."
+    }
+  ]
+}
