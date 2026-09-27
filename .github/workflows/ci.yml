@@ -8,6 +8,20 @@ on:
 jobs:
   backend:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     defaults:
       run:
         working-directory: backend
@@ -19,7 +33,9 @@ jobs:
           cache: pip
           cache-dependency-path: backend/requirements.txt
       - run: pip install -r requirements.txt
-      - run: pytest            # DB tests auto-skip without Postgres
+      - run: pytest
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
       - run: python scripts/export_openapi.py   # cwd: backend/ (job default)
       - name: Contract drift guard (committed OpenAPI must match the app)
         run: git diff --exit-code -- docs/api/openapi/openapi.json
