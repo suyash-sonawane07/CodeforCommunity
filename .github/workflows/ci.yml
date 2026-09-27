@@ -20,7 +20,9 @@ jobs:
           cache-dependency-path: backend/requirements.txt
       - run: pip install -r requirements.txt
       - run: pytest            # DB tests auto-skip without Postgres
-      - run: python scripts/export_openapi.py && git diff --exit-code docs/api/openapi/openapi.json
+      - run: python scripts/export_openapi.py   # cwd: backend/ (job default)
+      - name: Contract drift guard (committed OpenAPI must match the app)
+        run: git diff --exit-code -- docs/api/openapi/openapi.json
         working-directory: .
       - name: Lint (ruff, non-blocking until configured)
         run: ruff check app || true
