@@ -22,6 +22,8 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
+    env:
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@localhost:5432/testdb
     defaults:
       run:
         working-directory: backend
@@ -35,15 +37,9 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Run database migrations
         run: alembic upgrade head
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
       - name: Seed database
         run: python -m app.db.seed
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
       - run: pytest
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
       - run: python scripts/export_openapi.py   # cwd: backend/ (job default)
       - name: Contract drift guard (committed OpenAPI must match the app)
         run: git diff --exit-code -- docs/api/openapi/openapi.json
