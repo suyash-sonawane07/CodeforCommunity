@@ -327,7 +327,10 @@ def ingest_citizen_request(
 
     # 5. Cluster grouping
     matching_cluster = cluster_repo.find_matching_cluster(
-        issue_type=processed.issue_type, location_id=loc_id
+        issue_type=processed.issue_type,
+        location_id=loc_id,
+        latitude=processed.latitude,
+        longitude=processed.longitude,
     )
     if matching_cluster:
         cluster_repo.add_member(

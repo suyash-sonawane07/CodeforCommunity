@@ -105,25 +105,102 @@ class ClusterRepository:
         cluster = self.get_by_id(cluster_id)
         if cluster:
             cluster.raw_message_count += 1
-            # Simple deduplication heuristic: count independent demand
-            cluster.independent_demand_count = max(
-                1,
-                cluster.raw_message_count - 1
-                if cluster.raw_message_count > 2
-                else cluster.raw_message_count,
+
+            from app.models import CitizenRequest
+
+            new_req = self.db.query(CitizenRequest).filter(CitizenRequest.id == request_id).first()
+            existing_reqs = (
+                self.db.query(CitizenRequest)
+                .join(ClusterMember, ClusterMember.request_id == CitizenRequest.id)
+                .filter(ClusterMember.cluster_id == cluster_id, CitizenRequest.id != request_id)
+                .all()
             )
+
+            is_duplicate = False
+            if new_req and existing_reqs:
+                new_text = (new_req.raw_text or new_req.transcript or "").strip().lower()
+                for ex in existing_reqs:
+                    ex_text = (ex.raw_text or ex.transcript or "").strip().lower()
+                    if new_text and ex_text and new_text == ex_text:
+                        is_duplicate = True
+                        break
+                    if new_req.channel == ex.channel and new_req.channel in (
+                        "telegram",
+                        "whatsapp",
+                    ):
+                        if new_text and ex_text and (new_text in ex_text or ex_text in new_text):
+                            is_duplicate = True
+                            break
+
+            if not is_duplicate:
+                cluster.independent_demand_count += 1
+            elif cluster.independent_demand_count < 1:
+                cluster.independent_demand_count = 1
 
         self.db.flush()
         return member
 
     def find_matching_cluster(
-        self, issue_type: str, location_id: Optional[int] = None
+        self,
+        issue_type: str,
+        location_id: Optional[int] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        max_distance_km: float = 10.0,
     ) -> Optional[NeedsCluster]:
-        """Find an existing active or forming cluster with matching sector and location."""
-        query = self.db.query(NeedsCluster).filter(
-            NeedsCluster.issue_type == issue_type,
-            NeedsCluster.status.in_(["forming", "active"]),
-        )
+        """Find an existing active or forming cluster with matching sector and location/proximity."""
+        # 1. Exact location_id match
         if location_id:
-            query = query.filter(NeedsCluster.location_id == location_id)
-        return query.first()
+            exact = (
+                self.db.query(NeedsCluster)
+                .filter(
+                    NeedsCluster.issue_type == issue_type,
+                    NeedsCluster.location_id == location_id,
+                    NeedsCluster.status.in_(["forming", "active"]),
+                )
+                .first()
+            )
+            if exact:
+                return exact
+
+        # 2. Proximity search if latitude/longitude provided
+        if latitude is not None and longitude is not None:
+            import math
+
+            clusters_with_loc = (
+                self.db.query(NeedsCluster, Location)
+                .join(Location, NeedsCluster.location_id == Location.id)
+                .filter(
+                    NeedsCluster.issue_type == issue_type,
+                    NeedsCluster.status.in_(["forming", "active"]),
+                    Location.latitude.isnot(None),
+                    Location.longitude.isnot(None),
+                )
+                .all()
+            )
+            for cl, loc in clusters_with_loc:
+                lat1, lon1 = math.radians(latitude), math.radians(longitude)
+                lat2, lon2 = math.radians(loc.latitude), math.radians(loc.longitude)
+                dphi = lat2 - lat1
+                dlambda = lon2 - lon1
+                a = (
+                    math.sin(dphi / 2) ** 2
+                    + math.cos(lat1) * math.cos(lat2) * math.sin(dlambda / 2) ** 2
+                )
+                dist_km = 6371.0 * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+                if dist_km <= max_distance_km:
+                    return cl
+
+        # 3. Fallback: match by sector without location if location is unresolved
+        if not location_id and latitude is None:
+            return (
+                self.db.query(NeedsCluster)
+                .filter(
+                    NeedsCluster.issue_type == issue_type,
+                    NeedsCluster.location_id.is_(None),
+                    NeedsCluster.status.in_(["forming", "active"]),
+                )
+                .first()
+            )
+
+        return None

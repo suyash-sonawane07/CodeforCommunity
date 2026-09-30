@@ -218,7 +218,17 @@ class RuleBasedTextNormalizer:
         # Semantic English translation mapping for standard civic complaints
         translated_phrases = []
 
-        if any(w in lower for w in ["पिण्याच्या पाण्याचा पुरवठा नाही", "पाणी नाही", "पानी नहीं", "falta de água", "sem água", "нет воды"]):
+        if any(
+            w in lower
+            for w in [
+                "पिण्याच्या पाण्याचा पुरवठा नाही",
+                "पाणी नाही",
+                "पानी नहीं",
+                "falta de água",
+                "sem água",
+                "нет воды",
+            ]
+        ):
             translated_phrases.append("No drinking water supply in the area")
         elif any(w in lower for w in ["पाणी", "पानी", "water", "água", "вода", "amanzi"]):
             translated_phrases.append("Drinking water service disruption")
@@ -240,7 +250,15 @@ class RuleBasedTextNormalizer:
 
         # Check for place names to preserve
         place_found = None
-        for p in ["Demo Village 1", "डेमो गाव 1", "Demo Town 2", "डेमो टाउन 2", "Pune", "Aurangabad", "Chhatrapati Sambhajinagar"]:
+        for p in [
+            "Demo Village 1",
+            "डेमो गाव 1",
+            "Demo Town 2",
+            "डेमो टाउन 2",
+            "Pune",
+            "Aurangabad",
+            "Chhatrapati Sambhajinagar",
+        ]:
             if p in text or p.lower() in lower:
                 place_found = p
                 break
@@ -279,44 +297,222 @@ class RuleBasedIssueClassifier:
 
         keywords = {
             "water": [
-                "water", "drinking", "pipeline", "tap", "borewell", "tanker", "leakage", "leak",
-                "पाणी", "पाण्याचा", "पानी", "जल", "नळ", "नल", "टाकी", "टँकर", "विहीर",
-                "água", "vazamento", "torneira", "poço", "вода", "водопровод", "水", "停水", "amanzi",
+                "water",
+                "drinking",
+                "pipeline",
+                "tap",
+                "borewell",
+                "tanker",
+                "leakage",
+                "leak",
+                "पाणी",
+                "पाण्याचा",
+                "पानी",
+                "जल",
+                "नळ",
+                "नल",
+                "टाकी",
+                "टँकर",
+                "विहीर",
+                "água",
+                "vazamento",
+                "torneira",
+                "poço",
+                "вода",
+                "водопровод",
+                "水",
+                "停水",
+                "amanzi",
             ],
             "roads": [
-                "road", "pothole", "highway", "bridge", "pavement", "street", "broken road", "asphalt",
-                "सड़क", "रस्ता", "मार्ग", "पूल", "खड्डे", "खड्डा", "डांबरीकरण",
-                "estrada", "rua", "buraco", "asfalto", "ponte", "дорога", "яма", "мост", "路", "修路", "umgwaqo", "paaie",
+                "road",
+                "pothole",
+                "highway",
+                "bridge",
+                "pavement",
+                "street",
+                "broken road",
+                "asphalt",
+                "सड़क",
+                "रस्ता",
+                "मार्ग",
+                "पूल",
+                "खड्डे",
+                "खड्डा",
+                "डांबरीकरण",
+                "estrada",
+                "rua",
+                "buraco",
+                "asfalto",
+                "ponte",
+                "дорога",
+                "яма",
+                "мост",
+                "路",
+                "修路",
+                "umgwaqo",
+                "paaie",
             ],
             "power": [
-                "electricity", "power", "power cut", "blackout", "transformer", "wire", "voltage",
-                "बिजली", "वीज", "करंट", "लाइट", "लोड शेडिंग", "luz", "energia", "apagão", "poste",
-                "электричество", "свет", "трансформатор", "电", "停电", "amagesi", "krag",
+                "electricity",
+                "power",
+                "power cut",
+                "blackout",
+                "transformer",
+                "wire",
+                "voltage",
+                "बिजली",
+                "वीज",
+                "करंट",
+                "लाइट",
+                "लोड शेडिंग",
+                "luz",
+                "energia",
+                "apagão",
+                "poste",
+                "электричество",
+                "свет",
+                "трансформатор",
+                "电",
+                "停电",
+                "amagesi",
+                "krag",
             ],
             "sanitation": [
-                "sanitation", "toilet", "drainage", "sewage", "gutter", "garbage", "waste", "cleanliness",
-                "सफाई", "कचरा", "शौचालय", "सांडपाणी", "गटर", "ड्रेनेज", "स्वच्छता",
-                "lixo", "esgoto", "saneamento", "banheiro", "мусор", "канализация", "туалет", "垃圾", "排污", "isimbuzi",
+                "sanitation",
+                "toilet",
+                "drainage",
+                "sewage",
+                "gutter",
+                "garbage",
+                "waste",
+                "cleanliness",
+                "सफाई",
+                "कचरा",
+                "शौचालय",
+                "सांडपाणी",
+                "गटर",
+                "ड्रेनेज",
+                "स्वच्छता",
+                "lixo",
+                "esgoto",
+                "saneamento",
+                "banheiro",
+                "мусор",
+                "канализация",
+                "туалет",
+                "垃圾",
+                "排污",
+                "isimbuzi",
             ],
             "connectivity": [
-                "connectivity", "internet", "network", "mobile tower", "broadband", "signal", "wifi",
-                "वायफाय", "इंटरनेट", "नेटवर्क", "टावर", "सिग्नल",
-                "internet", "sinal", "rede", "antena", "связь", "интернет", "вышка", "网络", "信号", "宽带", "inthanethi",
+                "connectivity",
+                "internet",
+                "network",
+                "mobile tower",
+                "broadband",
+                "signal",
+                "wifi",
+                "वायफाय",
+                "इंटरनेट",
+                "नेटवर्क",
+                "टावर",
+                "सिग्नल",
+                "internet",
+                "sinal",
+                "rede",
+                "antena",
+                "связь",
+                "интернет",
+                "вышка",
+                "网络",
+                "信号",
+                "宽带",
+                "inthanethi",
             ],
             "education": [
-                "school", "college", "teacher", "classroom", "student", "education",
-                "शाळा", "शाळेत", "स्कूल", "शिक्षक", "शिक्षिका", "वर्ग", "विद्यार्थी",
-                "escola", "professor", "aluno", "aula", "educação", "школа", "учитель", "класс", "学校", "教师", "学生", "isikole",
+                "school",
+                "college",
+                "teacher",
+                "classroom",
+                "student",
+                "education",
+                "शाळा",
+                "शाळेत",
+                "स्कूल",
+                "शिक्षक",
+                "शिक्षिका",
+                "वर्ग",
+                "विद्यार्थी",
+                "escola",
+                "professor",
+                "aluno",
+                "aula",
+                "educação",
+                "школа",
+                "учитель",
+                "класс",
+                "学校",
+                "教师",
+                "学生",
+                "isikole",
             ],
             "health": [
-                "hospital", "clinic", "dispensary", "doctor", "health", "medicine", "phc", "nurse",
-                "दवाखाना", "रुग्णालय", "आरोग्य", "डॉक्टर", "औषध", "उपचार",
-                "hospital", "saúde", "médico", "remédio", "posto de saúde", "больница", "врач", "аптека", "лекарство", "医院", "医生", "药品", "isibhedlela",
+                "hospital",
+                "clinic",
+                "dispensary",
+                "doctor",
+                "health",
+                "medicine",
+                "phc",
+                "nurse",
+                "दवाखाना",
+                "रुग्णालय",
+                "आरोग्य",
+                "डॉक्टर",
+                "औषध",
+                "उपचार",
+                "hospital",
+                "saúde",
+                "médico",
+                "remédio",
+                "posto de saúde",
+                "больница",
+                "врач",
+                "аптека",
+                "лекарство",
+                "医院",
+                "医生",
+                "药品",
+                "isibhedlela",
             ],
             "transport": [
-                "bus", "transport", "transit", "travel", "rickshaw", "vehicle", "route", "depot",
-                "बस", "वाहतूक", "गाडी", "सवारी", "बसें", "स्थानक", "स्टँड",
-                "ônibus", "transporte", "veículo", "linha", "автобус", "транспорт", "маршрутка", "公交", "巴士", "车", "ibhasi",
+                "bus",
+                "transport",
+                "transit",
+                "travel",
+                "rickshaw",
+                "vehicle",
+                "route",
+                "depot",
+                "बस",
+                "वाहतूक",
+                "गाडी",
+                "सवारी",
+                "बसें",
+                "स्थानक",
+                "स्टँड",
+                "ônibus",
+                "transporte",
+                "veículo",
+                "linha",
+                "автобус",
+                "транспорт",
+                "маршрутка",
+                "公交",
+                "巴士",
+                "车",
+                "ibhasi",
             ],
         }
 
@@ -369,12 +565,43 @@ class RuleBasedEntityExtractor:
 
         # Facilities
         facility_patterns = [
-            ("water_supply", ["water supply", "pipe", "pipeline", "tap", "पाणी पुरवठा", "पाणी", "पानी", "नल", "नळ", "टाकी", "água", "torneira"]),
+            (
+                "water_supply",
+                [
+                    "water supply",
+                    "pipe",
+                    "pipeline",
+                    "tap",
+                    "पाणी पुरवठा",
+                    "पाणी",
+                    "पानी",
+                    "नल",
+                    "नळ",
+                    "टाकी",
+                    "água",
+                    "torneira",
+                ],
+            ),
             ("school", ["school", "शाळा", "स्कूल", "escola", "школа", "学校"]),
             ("bus_stop", ["bus stop", "bus stand", "बस स्टँड", "बस स्थानक", "बस", "parada de ônibus"]),
-            ("clinic", ["hospital", "clinic", "dispensary", "दवाखाना", "रुग्णालय", "hospital", "больница", "医院"]),
+            (
+                "clinic",
+                [
+                    "hospital",
+                    "clinic",
+                    "dispensary",
+                    "दवाखाना",
+                    "रुग्णालय",
+                    "hospital",
+                    "больница",
+                    "医院",
+                ],
+            ),
             ("toilet", ["toilet", "washroom", "शौचालय", "banheiro", "туалет"]),
-            ("transformer", ["transformer", "power line", "ट्रान्सफॉर्मर", "वीज", "बिजली", "transformador"]),
+            (
+                "transformer",
+                ["transformer", "power line", "ट्रान्सफॉर्मर", "वीज", "बिजली", "transformador"],
+            ),
         ]
         for fac_name, kws in facility_patterns:
             if any(kw in lower for kw in kws):
@@ -389,19 +616,38 @@ class RuleBasedEntityExtractor:
 
         # Urgency
         urgency_patterns = [
-            "broken", "urgent", "अडचण", "emergency", "नाही", "बंद", "खड्डे", "तातडीने",
-            "खराब", "उशीर", "urgente", "crítico", "sem água", "срочно", "紧急", "危险",
+            "broken",
+            "urgent",
+            "अडचण",
+            "emergency",
+            "नाही",
+            "बंद",
+            "खड्डे",
+            "तातडीने",
+            "खराब",
+            "उशीर",
+            "urgente",
+            "crítico",
+            "sem água",
+            "срочно",
+            "紧急",
+            "危险",
         ]
         for up in urgency_patterns:
             if up in lower:
                 entities.append(
-                    EntityResult(provider=self.name, confidence=0.85, entity_type="urgency", value=up)
+                    EntityResult(
+                        provider=self.name, confidence=0.85, entity_type="urgency", value=up
+                    )
                 )
                 break
 
         # Affected count
         affected_patterns = [
-            ("entire village", ["entire village", "पूर्ण गाव", "गावातील सर्व", "toda a comunidade", "все жители"]),
+            (
+                "entire village",
+                ["entire village", "पूर्ण गाव", "गावातील सर्व", "toda a comunidade", "все жители"],
+            ),
             ("all students", ["all students", "सर्व विद्यार्थी", "मुलांना", "todos os alunos"]),
             ("500 people", ["500 people", "500 लोक", "500 नागरिक"]),
             ("100 families", ["100 families", "100 कुटुंबे", "100 परिवार"]),
@@ -681,7 +927,11 @@ class OpenAINLPProvider:
 
     def detect(self, text: str) -> LanguageDetectionResult:
         parsed = self._call_openai(text)
-        if parsed and "language" in parsed and parsed["language"] in ("hi", "mr", "en", "pt", "ru", "zh", "zu", "af", "unknown"):
+        if (
+            parsed
+            and "language" in parsed
+            and parsed["language"] in ("hi", "mr", "en", "pt", "ru", "zh", "zu", "af", "unknown")
+        ):
             return LanguageDetectionResult(
                 provider=self.name,
                 confidence=float(parsed.get("language_confidence", 0.92)),
