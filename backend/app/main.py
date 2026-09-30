@@ -18,6 +18,9 @@ from fastapi.responses import JSONResponse
 
 from app import models  # noqa: F401 — register all models with Alembic/Base
 from app.api.routes import (
+    priorities,
+    stats,
+
     audit,
     auth,
     clusters,
@@ -60,6 +63,9 @@ app.add_middleware(
 
 for router in (
     auth.router,
+    priorities.router,
+    stats.router,
+
     requests.router,
     clusters.router,
     geospatial.router,

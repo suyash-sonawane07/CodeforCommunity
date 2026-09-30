@@ -1,8 +1,7 @@
 /**
- * Central API client — the ONLY module that talks to the backend.
+ * Central API client — handles both direct backend calls and Next.js /api/proxy calls.
  *
  * Consumes the contract in docs/api/API_CONTRACT.md; typed by types/api.ts.
- * Member A: extend per-endpoint helpers here as screens are wired (Phase 2+).
  */
 import { API_BASE_URL } from "./config";
 import type {
@@ -25,6 +24,8 @@ import type {
   SimulationResult,
 } from "@/types/api";
 
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL || '/api/proxy';
+
 /** Uniform API error carrying the backend's error envelope (docs/api contract). */
 export class ApiError extends Error {
   readonly code: string;
@@ -40,14 +41,46 @@ export class ApiError extends Error {
   }
 }
 
+let isRedirecting = false;
+
+export async function fetchApi<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const headers = new Headers(options.headers || {});
+  
+  if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
+    headers.set('Content-Type', 'application/json');
+  }
+
+  const response = await fetch(`${NEXT_PUBLIC_API_URL}${path}`, {
+    ...options,
+    headers,
+  });
+
+  if (response.status === 401 && path !== '/auth/login') {
+    if (typeof window !== 'undefined' && !isRedirecting) {
+      isRedirecting = true;
+      await fetch('/api/auth/logout', { method: 'POST' });
+      window.location.replace('/login?expired=1');
+    }
+    return new Promise(() => {}); // never resolve while redirecting
+  }
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    const code = errorBody?.error?.code || 'API_ERROR';
+    const message = errorBody?.error?.message || response.statusText || 'API Error';
+    throw new ApiError(response.status, code, message, errorBody?.error?.details);
+  }
+
+  return response.json();
+}
+
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
-      ...(init.headers ?? {}),
+      ...((init.headers as Record<string, string>) ?? {}),
     },
-    // Next.js must never cache citizen/planner API responses
     cache: "no-store",
   });
 
@@ -76,8 +109,7 @@ function authHeaders(token?: string): Record<string, string> {
 }
 
 /* ------------------------------------------------------------------ *
- * Contract helpers (all backend business endpoints are 501 today —
- * callers must handle ApiError with code NOT_IMPLEMENTED).          *
+ * Contract helpers                                                    *
  * ------------------------------------------------------------------ */
 
 export const api = {

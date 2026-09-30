@@ -4,7 +4,15 @@
  * RULE: `NEXT_PUBLIC_API_BASE_URL` is the ONE place the backend URL lives.
  * Never hardcode localhost or URLs elsewhere (scaffold requirement §5).
  */
-export const API_BASE_URL: string = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+function normalizeUrl(url?: string): string {
+  if (!url) return "http://localhost:8000";
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    return `https://${url}`;
+  }
+  return url;
+}
+
+export const API_BASE_URL: string = normalizeUrl(process.env.NEXT_PUBLIC_API_BASE_URL);
 
 export const APP_NAME = "CivicPulse";
 export const APP_VERSION = "0.1.0";

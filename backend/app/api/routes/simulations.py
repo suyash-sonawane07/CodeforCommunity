@@ -25,7 +25,8 @@ def run_simulation(
     out = run_scenario(SimulationInput(sector_allocations=body.sector_allocations), db=db)
 
     # Persist scenario run
-    u = db.query(User).filter(User.email == user.get("subject")).first()
+    user_email = user.email if hasattr(user, "email") else user.get("subject")
+    u = db.query(User).filter(User.email == user_email).first()
     user_id = u.id if u else None
 
     scenario = SimulationScenario(

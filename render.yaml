@@ -1,0 +1,77 @@
+# Render Infrastructure as Code (Blueprint) Specification
+# Deploy with one click on Render: https://render.com
+# Documentation: https://render.com/docs/blueprint-spec
+
+databases:
+  - name: civicpulse-db
+    databaseName: civicpulse
+    user: civicpulse
+    plan: free
+    region: oregon
+    ipAllowList: []
+
+services:
+  # -------------------------------------------------------------
+  # CivicPulse Backend API (FastAPI + AI Intelligence Layer)
+  # -------------------------------------------------------------
+  - type: web
+    name: civicpulse-backend
+    runtime: python
+    region: oregon
+    plan: free
+    buildCommand: "pip install --upgrade pip && pip install -r backend/requirements.txt -r ai/requirements.txt"
+    startCommand: "cd backend && PYTHONPATH=..:$PYTHONPATH alembic upgrade head && PYTHONPATH=..:$PYTHONPATH python -m app.db.seed && PYTHONPATH=..:$PYTHONPATH uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: civicpulse-db
+          property: connectionString
+      - key: PYTHONPATH
+        value: ..:.
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: AI_STT_PROVIDER
+        value: mock
+      - key: AI_LLM_PROVIDER
+        value: mock
+      - key: AI_EMBEDDING_PROVIDER
+        value: mock
+      - key: GEOCODING_PROVIDER
+        value: mock
+      - key: APP_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+
+  # -------------------------------------------------------------
+  # CivicPulse Frontend (Next.js 14 Material 3 + Gemini Copilot)
+  # -------------------------------------------------------------
+  - type: web
+    name: civicpulse-frontend
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: frontend
+    buildCommand: "npm install && npm run build"
+    startCommand: "npm run start"
+    envVars:
+      - key: NEXT_PUBLIC_API_BASE_URL
+        fromService:
+          type: web
+          name: civicpulse-backend
+          property: host
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: civicpulse-backend
+          property: host
+      - key: JWT_SECRET
+        fromService:
+          type: web
+          name: civicpulse-backend
+          envVarKey: JWT_SECRET
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"

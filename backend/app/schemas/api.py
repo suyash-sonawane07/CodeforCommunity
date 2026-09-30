@@ -43,6 +43,19 @@ class VersionResponse(BaseModel):
 # ---------------------------------------------------------------- auth
 
 
+class SignupRequest(BaseModel):
+    email: str
+    password: str
+    name: str
+
+
+class UserResponse(BaseModel):
+    id: int
+    email: str
+    name: str
+    role: str
+
+
 class LoginRequest(BaseModel):
     email: str
     password: str
@@ -52,6 +65,7 @@ class LoginResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     role: str
+    user: Optional[UserResponse] = None
 
 
 # ---------------------------------------------------------------- requests (FR-001..009)
@@ -283,3 +297,23 @@ class NotImplementedResponse(BaseModel):
             message="Scaffold endpoint — logic not implemented yet (see docs/api/API_CONTRACT.md)",
         )
     )
+
+
+# ---------------------------------------------------------------- stats and priorities
+
+class StatsResponse(BaseModel):
+    totals: int
+    hotspots: list[str]
+    critical_gaps: int
+    approved: int
+
+class PriorityItem(BaseModel):
+    cluster_id: int
+    issue: str
+    country: str
+    date: str
+    rank: int
+    score: float
+
+class PrioritiesResponse(BaseModel):
+    items: list[PriorityItem]

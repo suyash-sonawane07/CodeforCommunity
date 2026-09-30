@@ -16,5 +16,7 @@ class User(Base, TimestampMixin):
     name: Mapped[str] = mapped_column(String(200))
     email: Mapped[str] = mapped_column(String(320), unique=True, index=True)
     phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    hashed_password: Mapped[str] = mapped_column(String(255), nullable=True)
+
     role: Mapped[str] = mapped_column(String(30), default="analyst")  # PRD §5 roles
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)

@@ -153,7 +153,8 @@ def correct_cluster(
     after_val = {"issue_type": c.issue_type, "uncertainty_notes": c.uncertainty_notes}
 
     # Record review action & audit log
-    reviewer_user = db.query(User).filter(User.email == user.get("subject")).first()
+    user_email = user.email if hasattr(user, "email") else user.get("subject")
+    reviewer_user = db.query(User).filter(User.email == user_email).first()
     reviewer_id = reviewer_user.id if reviewer_user else None
 
     gov_repo.record_review_action(
@@ -225,7 +226,8 @@ def review_cluster(
 
     after_val = {"status": c.status, "review_status": c.review_status}
 
-    reviewer_user = db.query(User).filter(User.email == user.get("subject")).first()
+    user_email = user.email if hasattr(user, "email") else user.get("subject")
+    reviewer_user = db.query(User).filter(User.email == user_email).first()
     reviewer_id = reviewer_user.id if reviewer_user else None
 
     gov_repo.record_review_action(

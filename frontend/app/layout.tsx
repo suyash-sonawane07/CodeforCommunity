@@ -1,23 +1,16 @@
 import type { Metadata } from "next";
-
-import { AppShell } from "@/components/layouts";
-
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: {
-    default: "CivicPulse",
-    template: "%s — CivicPulse",
-  },
-  description:
-    "AI development-needs intelligence layer for citizen requests (hackathon scaffold — features not yet implemented).",
+  title: "CivicPulse",
+  description: "AI development-needs intelligence layer for citizen requests.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="bg-white text-gray-900 antialiased">
-        <AppShell>{children}</AppShell>
+      <body className="bg-slate-50 text-slate-900 antialiased font-sans">
+        {children}
       </body>
     </html>
   );

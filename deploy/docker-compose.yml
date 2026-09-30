@@ -1,61 +1,60 @@
-version: "3.9"
-
-# CivicPulse — production-shaped stack (use docker-compose.dev.yml for hot reload).
-
 services:
-  db:
-    image: postgis/postgis:16-3.4
-    container_name: civicpulse-db
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-civicpulse}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-civicpulse}
-      POSTGRES_DB: ${POSTGRES_DB:-civicpulse}
-    ports:
-      - "${DB_PORT:-5432}:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-civicpulse} -d ${POSTGRES_DB:-civicpulse}"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-
   backend:
     build:
-      context: ../backend
-      dockerfile: ../deploy/docker/backend.Dockerfile
+      context: ..
+      dockerfile: deploy/docker/backend.Dockerfile
+    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port
+      ${BACKEND_PORT:-8000}"
     container_name: civicpulse-backend
-    environment:
-      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-civicpulse}:${POSTGRES_PASSWORD:-civicpulse}@db:5432/${POSTGRES_DB:-civicpulse}
-      CORS_ORIGINS: http://localhost:${FRONTEND_PORT:-3000}
-      AI_STT_PROVIDER: ${AI_STT_PROVIDER:-mock}
-      AI_LLM_PROVIDER: ${AI_LLM_PROVIDER:-mock}
-      AI_EMBEDDING_PROVIDER: ${AI_EMBEDDING_PROVIDER:-mock}
-      GEOCODING_PROVIDER: ${GEOCODING_PROVIDER:-mock}
-    ports:
-      - "${BACKEND_PORT:-8000}:8000"
     depends_on:
       db:
         condition: service_healthy
-    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${BACKEND_PORT:-8000}"
+    environment:
+      AI_EMBEDDING_PROVIDER: ${AI_EMBEDDING_PROVIDER:-mock}
+      AI_LLM_PROVIDER: ${AI_LLM_PROVIDER:-mock}
+      AI_STT_PROVIDER: ${AI_STT_PROVIDER:-mock}
+      CORS_ORIGINS: http://localhost:${FRONTEND_PORT:-3000}
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-civicpulse}:${POSTGRES_PASSWORD:-civicpulse}@db:5432/${POSTGRES_DB:-civicpulse}
+      GEOCODING_PROVIDER: ${GEOCODING_PROVIDER:-mock}
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
       interval: 10s
-      timeout: 5s
       retries: 6
-
+      test:
+      - CMD-SHELL
+      - python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+      timeout: 5s
+    ports:
+    - ${BACKEND_PORT:-8000}:8000
+  db:
+    container_name: civicpulse-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-civicpulse}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-civicpulse}
+      POSTGRES_USER: ${POSTGRES_USER:-civicpulse}
+    healthcheck:
+      interval: 5s
+      retries: 10
+      test:
+      - CMD-SHELL
+      - pg_isready -U ${POSTGRES_USER:-civicpulse} -d ${POSTGRES_DB:-civicpulse}
+      timeout: 3s
+    image: postgis/postgis:16-3.4
+    ports:
+    - ${DB_PORT:-5432}:5432
+    volumes:
+    - pgdata:/var/lib/postgresql/data
   frontend:
     build:
       context: ../frontend
-      dockerfile: ../deploy/docker/frontend.Dockerfile
+      dockerfile: Dockerfile
     container_name: civicpulse-frontend
-    environment:
-      NEXT_PUBLIC_API_BASE_URL: http://localhost:${BACKEND_PORT:-8000}
-    ports:
-      - "${FRONTEND_PORT:-3000}:3000"
     depends_on:
       backend:
         condition: service_healthy
-
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:${BACKEND_PORT:-8000}
+    ports:
+    - ${FRONTEND_PORT:-3000}:3000
+version: '3.9'
 volumes:
-  pgdata:
+  pgdata: null

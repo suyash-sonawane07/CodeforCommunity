@@ -6,8 +6,8 @@ version: "3.9"
 services:
   backend:
     build:
-      context: ../backend
-      dockerfile: ../deploy/docker/backend.Dockerfile
+      context: ..
+      dockerfile: deploy/docker/backend.Dockerfile
     command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${BACKEND_PORT:-8000} --reload"
     volumes:
       - ../backend/app:/code/app
@@ -15,6 +15,7 @@ services:
       - ../backend/alembic.ini:/code/alembic.ini
       - ../backend/tests:/code/tests
       - ../backend/scripts:/code/scripts
+      - ../ai:/code/ai
 
   frontend:
     command: npm run dev
@@ -30,3 +31,8 @@ services:
       - ../frontend/services:/code/services
       - ../frontend/public:/code/public
       - ../frontend/tests:/code/tests
+      - ../frontend/tsconfig.json:/code/tsconfig.json
+      - ../frontend/tailwind.config.ts:/code/tailwind.config.ts
+      - ../frontend/middleware.ts:/code/middleware.ts
+      - ../frontend/postcss.config.js:/code/postcss.config.js
+      - ../frontend/next.config.js:/code/next.config.js
