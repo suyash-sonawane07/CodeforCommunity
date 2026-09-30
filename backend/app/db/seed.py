@@ -374,6 +374,13 @@ def _seed_base_demo(db) -> None:
             )
 
         # --- 10. Review Actions & Audit Trail -----------------------------------
+        reviewer_user = (
+            db.query(User).filter(User.email == "reviewer@civicpulse.dev").first()
+            or db.query(User).filter(User.role == "reviewer").first()
+            or db.query(User).first()
+        )
+        reviewer_id = reviewer_user.id if reviewer_user else None
+
         db.add(
             ReviewAction(
                 cluster_id=cl1.id,
