@@ -5,7 +5,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, require_role
+from app.api.deps import get_db, require_supervisor
 from app.models import Location, NeedsCluster
 from app.schemas import GeoJSONFeature, GeoJSONFeatureCollection
 
@@ -21,7 +21,7 @@ def cluster_geojson(
     sector: Optional[str] = Query(default=None, alias="sector"),
     district: Optional[str] = None,
     db: Session = Depends(get_db),
-    user=Depends(require_role("analyst")),
+    user=Depends(require_supervisor),
 ) -> GeoJSONFeatureCollection:
     """Returns valid GeoJSON points for clusters. Unresolved locations have geometry: None (FR-021/033)."""
     query = db.query(NeedsCluster)

@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, require_role
+from app.api.deps import get_db, require_supervisor
 from app.models import AuditLog
 from app.schemas import AuditLogEntry, AuditLogListResponse
 
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/audit-logs", tags=["audit"])
 )
 def list_audit_logs(
     db: Session = Depends(get_db),
-    user=Depends(require_role("admin")),
+    user=Depends(require_supervisor),
 ) -> AuditLogListResponse:
     """Returns an immutable audit log trail for governance and review actions (FR-062)."""
     logs = db.query(AuditLog).order_by(AuditLog.id.desc()).limit(100).all()

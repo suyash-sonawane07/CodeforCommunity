@@ -19,6 +19,8 @@ class CitizenRequest(Base, TimestampMixin):
     __tablename__ = "citizen_requests"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+
     reference_code: Mapped[str] = mapped_column(String(30), unique=True, index=True)
     channel: Mapped[str] = mapped_column(String(30))  # text | voice | telegram | whatsapp
     raw_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # immutable (FR-004)
@@ -43,7 +45,11 @@ class RequestTranscription(Base, TimestampMixin):
     __tablename__ = "request_transcriptions"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+
     request_id: Mapped[int] = mapped_column(ForeignKey("citizen_requests.id"), index=True)
+    user_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+
     stt_model: Mapped[str] = mapped_column(String(100))
     stt_provider: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     confidence: Mapped[Optional[float]] = mapped_column(Float, nullable=True)  # FR-017
@@ -58,7 +64,11 @@ class ExtractedEntity(Base, TimestampMixin):
     __tablename__ = "extracted_entities"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+
     request_id: Mapped[int] = mapped_column(ForeignKey("citizen_requests.id"), index=True)
+    user_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+
     entity_type: Mapped[str] = mapped_column(String(50))  # place|facility|time|urgency|...
     value: Mapped[str] = mapped_column(Text)  # never translated proper nouns (FR-016)
     confidence: Mapped[Optional[float]] = mapped_column(Float, nullable=True)

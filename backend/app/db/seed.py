@@ -50,21 +50,21 @@ def _seed_base_demo(db) -> None:
             db.add(ds_demo)
             db.flush()
 
+        
+        from app.core.security import get_password_hash
         # --- 2. Users (PRD §5) --------------------------------------------------
         if db.query(User).count() == 0:
-            for name, email, role in [
-                ("Demo Analyst", "analyst@civicpulse.dev", "analyst"),
-                ("Demo Reviewer", "reviewer@civicpulse.dev", "reviewer"),
-                ("Demo Decision-Maker", "decision@civicpulse.dev", "decision_maker"),
-                ("Demo Admin", "admin@civicpulse.dev", "admin"),
+            for name, email, role, pwd in [
+                ("Demo Analyst", "analyst@civicpulse.dev", "analyst", "demo123"),
+                ("Demo Reviewer", "reviewer@civicpulse.dev", "reviewer", "demo123"),
+                ("Demo Decision-Maker", "decision@civicpulse.dev", "decision_maker", "demo123"),
+                ("Demo Admin", "admin@civicpulse.dev", "admin", "demo123"),
+                ("Demo User", "user@demo.com", "user", "demo123"),
+                ("Demo Supervisor", "supervisor@demo.com", "supervisor", "demo123"),
             ]:
-                db.add(User(name=name, email=email, role=role))
+                db.add(User(name=name, email=email, role=role, hashed_password=get_password_hash(pwd)))
             db.flush()
-
-        reviewer = db.query(User).filter(User.role == "reviewer").first()
-        reviewer_id = reviewer.id if reviewer else None
-
-        # --- 3. Locations (PostGIS geometry) ------------------------------------
+# --- 3. Locations (PostGIS geometry) ------------------------------------
         village1 = db.query(Location).filter(Location.village_ward == "Demo Village 1").first()
         if not village1:
             village1 = Location(

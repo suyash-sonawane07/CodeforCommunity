@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, require_role
+from app.api.deps import get_db, require_supervisor
 from app.models import PublicDataset
 from app.schemas import DatasetInfo, DatasetListResponse
 
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/datasets", tags=["datasets"])
 )
 def list_datasets(
     db: Session = Depends(get_db),
-    user=Depends(require_role("admin")),
+    user=Depends(require_supervisor),
 ) -> DatasetListResponse:
     """Lists registered public datasets with versions and source labels (FR-038)."""
     datasets = db.query(PublicDataset).all()

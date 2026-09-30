@@ -14,14 +14,19 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "jose": "^6.2.12",
+    "leaflet": "^1.9.4",
     "next": "14.2.23",
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "react-leaflet": "^4.2.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@testing-library/jest-dom": "6.6.3",
     "@testing-library/react": "16.1.0",
     "@types/jest": "29.5.14",
+    "@types/leaflet": "^1.9.22",
     "@types/node": "22.10.2",
     "@types/react": "18.3.18",
     "@types/react-dom": "18.3.5",

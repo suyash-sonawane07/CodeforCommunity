@@ -1,9 +1,4 @@
-"""Auth boundary — DEMO PLACEHOLDER ONLY.
-
-SCAFFOLD: implements just enough for the PRD demo-login flow (POST /auth/login →
-role-scoped token; PRD §5 roles). This is NOT production authentication. RBAC
-enforcement hooks exist (`require_role`) but only check claims, with dev-only secrets.
-"""
+"""Auth boundary."""
 
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
@@ -11,18 +6,30 @@ from typing import Any, Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
+from passlib.context import CryptContext
 
 from app.core.config import get_settings
+from app.db.session import get_db
+from app.models.user import User
+from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 _settings = get_settings()
 
-ROLE_HIERARCHY = ["citizen", "analyst", "reviewer", "decision_maker", "admin"]
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
 
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
+
+
 def create_access_token(subject: str, role: str) -> str:
-    """Issue a demo role-scoped JWT. TODO(PRD FR-058+): replace with real auth in Phase 3."""
     now = datetime.now(timezone.utc)
     payload: dict[str, Any] = {
         "sub": subject,
@@ -36,7 +43,7 @@ def create_access_token(subject: str, role: str) -> str:
 def decode_token(token: str) -> dict[str, Any]:
     try:
         return jwt.decode(token, _settings.JWT_SECRET, algorithms=[_settings.JWT_ALGORITHM])
-    except JWTError as exc:  # pragma: no cover - trivial
+    except JWTError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"error": {"code": "UNAUTHORIZED", "message": "Invalid or expired token"}},
@@ -45,30 +52,38 @@ def decode_token(token: str) -> dict[str, Any]:
 
 def get_current_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer_scheme),
-) -> dict[str, Any]:
-    """Dependency: require a valid demo token. Public endpoints simply don't use it."""
+    db: Session = Depends(get_db)
+) -> User:
     if credentials is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"error": {"code": "UNAUTHORIZED", "message": "Missing bearer token"}},
         )
     claims = decode_token(credentials.credentials)
-    return {"subject": claims.get("sub"), "role": claims.get("role", "citizen")}
-
-
-def require_role(minimum: str):
-    """RBAC placeholder: enforce the PRD §5 role hierarchy at the API layer."""
-
-    def _checker(user: dict[str, Any] = Depends(get_current_user)) -> dict[str, Any]:
-        have, need = (
-            ROLE_HIERARCHY.index(user.get("role", "citizen")),
-            ROLE_HIERARCHY.index(minimum),
+    email = claims.get("sub")
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"error": {"code": "UNAUTHORIZED", "message": "Invalid token subject"}},
         )
-        if have < need:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail={"error": {"code": "FORBIDDEN", "message": f"Requires role {minimum}+"}},
-            )
-        return user
+    user = db.scalar(select(User).where(User.email == email))
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"error": {"code": "UNAUTHORIZED", "message": "User not found"}},
+        )
+    return user
 
-    return _checker
+
+def require_user(user: User = Depends(get_current_user)) -> User:
+    # Any valid user can pass this
+    return user
+
+
+def require_supervisor(user: User = Depends(get_current_user)) -> User:
+    if user.role != "supervisor" and user.role != "admin" and user.role != "reviewer":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"error": {"code": "FORBIDDEN", "message": "Requires supervisor role"}},
+        )
+    return user

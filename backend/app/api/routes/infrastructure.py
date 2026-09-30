@@ -5,7 +5,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, require_role
+from app.api.deps import get_db, require_supervisor
 from app.models import DemographicIndicator, InfrastructureAsset, Location, PublicDataset
 from app.schemas import InfrastructureLayerResponse
 
@@ -21,7 +21,7 @@ def infrastructure_layer(
     asset_type: Optional[str] = None,
     district: Optional[str] = None,
     db: Session = Depends(get_db),
-    user=Depends(require_role("analyst")),
+    user=Depends(require_supervisor),
 ) -> InfrastructureLayerResponse:
     """Returns infrastructure assets and demographic indicators alongside dataset provenance (FR-057)."""
     # Assets query

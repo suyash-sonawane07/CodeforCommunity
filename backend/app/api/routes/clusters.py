@@ -5,7 +5,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, require_role
+from app.api.deps import get_db, require_supervisor
 from app.models import Location, User
 from app.repositories import ClusterRepository, GovernanceRepository
 from app.schemas import (
@@ -37,7 +37,7 @@ def list_clusters(
     district: Optional[str] = None,
     status_filter: Optional[str] = Query(default=None, alias="status"),
     db: Session = Depends(get_db),
-    user=Depends(require_role("analyst")),
+    user=Depends(require_supervisor),
 ) -> ClusterListResponse:
     """List clusters with multi-factor filtering."""
     chosen_sector = sector or issue_type
@@ -76,7 +76,7 @@ def list_clusters(
 def get_cluster(
     cluster_id: int,
     db: Session = Depends(get_db),
-    user=Depends(require_role("analyst")),
+    user=Depends(require_supervisor),
 ) -> ClusterDetail:
     cluster_repo = ClusterRepository(db)
     c = cluster_repo.get_by_id(cluster_id)
@@ -124,7 +124,7 @@ def correct_cluster(
     cluster_id: int,
     body: ClusterCorrection,
     db: Session = Depends(get_db),
-    user=Depends(require_role("reviewer")),
+    user=Depends(require_supervisor),
 ) -> ReviewActionResponse:
     cluster_repo = ClusterRepository(db)
     gov_repo = GovernanceRepository(db)
@@ -194,7 +194,7 @@ def review_cluster(
     cluster_id: int,
     body: ReviewActionCreate,
     db: Session = Depends(get_db),
-    user=Depends(require_role("reviewer")),
+    user=Depends(require_supervisor),
 ) -> ReviewActionResponse:
     cluster_repo = ClusterRepository(db)
     gov_repo = GovernanceRepository(db)
@@ -265,7 +265,7 @@ def review_cluster(
 def get_evidence(
     cluster_id: int,
     db: Session = Depends(get_db),
-    user=Depends(require_role("analyst")),
+    user=Depends(require_supervisor),
 ) -> EvidencePanel:
     out = build_evidence_panel(EvidenceInput(cluster_id=cluster_id), db=db)
     return EvidencePanel(**out.payload)
@@ -279,7 +279,7 @@ def get_evidence(
 def get_gap_analysis(
     cluster_id: int,
     db: Session = Depends(get_db),
-    user=Depends(require_role("analyst")),
+    user=Depends(require_supervisor),
 ) -> GapAnalysisResult:
     out = detect_gap(GapDetectionInput(cluster_id=cluster_id), db=db)
     conflicting = None
@@ -317,7 +317,7 @@ def get_gap_analysis(
 def get_priority(
     cluster_id: int,
     db: Session = Depends(get_db),
-    user=Depends(require_role("analyst")),
+    user=Depends(require_supervisor),
 ) -> PriorityBreakdown:
     weights = {"demand": 0.25, "gap": 0.25, "impact": 0.25, "equity": 0.25, "funded_penalty": 0.50}
     out = compute_priority(PrioritisationInput(cluster_id=cluster_id, weights=weights), db=db)

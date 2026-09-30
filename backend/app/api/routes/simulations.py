@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, require_role
+from app.api.deps import get_db, require_supervisor
 from app.models import SimulationScenario, User
 from app.schemas import SimulationCreate, SimulationResult
 from app.services.simulation import SimulationInput, run_scenario
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/simulations", tags=["simulations"])
 def run_simulation(
     body: SimulationCreate,
     db: Session = Depends(get_db),
-    user=Depends(require_role("decision_maker")),
+    user=Depends(require_supervisor),
 ) -> SimulationResult:
     """Executes deterministic scenario planning and returns coverage outcomes."""
     out = run_scenario(SimulationInput(sector_allocations=body.sector_allocations), db=db)
