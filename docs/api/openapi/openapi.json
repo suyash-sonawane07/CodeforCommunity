@@ -899,6 +899,48 @@
         ]
       }
     },
+    "/webhooks/telegram": {
+      "post": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Telegram Bot Webhook (text & voice) \u2014 Phase 2",
+        "description": "Receives Telegram Bot updates, extracts text or voice messages,\n\nprocesses them through the multilingual AI intake pipeline,\nand returns a reply with the tracking ID.",
+        "operationId": "telegram_webhook_webhooks_telegram_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TelegramWebhookResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webhooks/whatsapp": {
+      "post": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Twilio WhatsApp Webhook stub (text & voice) \u2014 Phase 2",
+        "description": "Accepts Twilio-formatted WhatsApp webhook requests (form-encoded or JSON),\n\nruns intake through the AI pipeline, and replies with a tracking ID via TwiML XML.",
+        "operationId": "whatsapp_webhook_webhooks_whatsapp_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "tags": [
@@ -2158,6 +2200,71 @@
           "sector_allocations"
         ],
         "title": "SimulationResult"
+      },
+      "TelegramWebhookResponse": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok",
+            "default": true
+          },
+          "method": {
+            "type": "string",
+            "title": "Method",
+            "default": "sendMessage"
+          },
+          "chat_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chat Id"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "reference_code": {
+            "type": "string",
+            "title": "Reference Code"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "issue_type": {
+            "type": "string",
+            "title": "Issue Type"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "request_id",
+          "reference_code",
+          "status",
+          "issue_type"
+        ],
+        "title": "TelegramWebhookResponse"
       },
       "ValidationError": {
         "properties": {

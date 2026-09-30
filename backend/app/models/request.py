@@ -20,7 +20,7 @@ class CitizenRequest(Base, TimestampMixin):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     reference_code: Mapped[str] = mapped_column(String(30), unique=True, index=True)
-    channel: Mapped[str] = mapped_column(String(10))  # text | voice
+    channel: Mapped[str] = mapped_column(String(30))  # text | voice | telegram | whatsapp
     raw_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # immutable (FR-004)
     audio_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     language: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)  # hi|mr|en|unknown

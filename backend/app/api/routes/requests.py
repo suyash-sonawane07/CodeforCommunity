@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
-from app.repositories import ClusterRepository, RequestRepository
+from app.repositories import RequestRepository
 from app.schemas import (
     AudioUploadResponse,
     NotImplementedResponse,
@@ -14,7 +14,7 @@ from app.schemas import (
     RequestCreateResponse,
     RequestStatusResponse,
 )
-from app.services.ai_runtime import process_citizen_request
+from app.services.ai_runtime import ingest_citizen_request
 
 router = APIRouter(prefix="/requests", tags=["requests"])
 
@@ -28,98 +28,22 @@ router = APIRouter(prefix="/requests", tags=["requests"])
 )
 def create_request(body: RequestCreate, db: Session = Depends(get_db)) -> RequestCreateResponse:
     """Intake endpoint: runs STT, language detection, classification, NER, geocoding and clustering."""
-    # 1. AI processing pipeline
-    processed = process_citizen_request(
+    req, processed, loc_name = ingest_citizen_request(
+        db=db,
         channel=body.channel,
         text=body.text,
         language_hint=body.language_hint,
         audio_base64=body.audio_base64,
         location_text=body.location_text,
-    )
-
-    req_repo = RequestRepository(db)
-    cluster_repo = ClusterRepository(db)
-
-    # 2. Location persistence
-    loc_id = None
-    resolved_location_name = None
-    if processed.location_resolved or body.location_text:
-        admin = processed.admin_hierarchy or {}
-        resolved_location_name = (
-            admin.get("village_ward") or admin.get("district") or body.location_text
-        )
-        if not resolved_location_name and processed.entities:
-            for ent in processed.entities:
-                if ent.get("entity_type") in ("location", "place", "facility"):
-                    resolved_location_name = ent.get("value")
-                    break
-
-        loc = req_repo.create_or_get_location(
-            source_text=body.location_text or processed.raw_text,
-            latitude=processed.latitude,
-            longitude=processed.longitude,
-            state=admin.get("state", "Demo State"),
-            district=admin.get("district", "Demo District 1"),
-            block=admin.get("block", "Demo Block A"),
-            village_ward=resolved_location_name,
-            confidence=0.85 if processed.location_resolved else 0.3,
-            resolution_method="gazetteer_exact"
-            if processed.location_resolved
-            else "unresolved_text",
-            status="resolved" if processed.location_resolved else "location_unresolved",
-        )
-        loc_id = loc.id
-
-    # 3. Create CitizenRequest
-    req = req_repo.create_request(
-        channel=body.channel,
         consent_ack=body.consent_ack,
-        raw_text=body.text or processed.raw_text,
-        language=processed.language,
-        transcript=processed.transcript,
-        status="processed",
-        uncertainty_notes=processed.uncertainty_notes,
     )
-
-    # 4. Save entities
-    if processed.entities:
-        req_repo.add_entities(req.id, processed.entities)
-
-    # 5. Cluster grouping
-    matching_cluster = cluster_repo.find_matching_cluster(
-        issue_type=processed.issue_type, location_id=loc_id
-    )
-    if matching_cluster:
-        cluster_repo.add_member(
-            cluster_id=matching_cluster.id,
-            request_id=req.id,
-            similarity_score=0.88,
-            assignment="auto",
-        )
-    else:
-        new_cluster = cluster_repo.create_cluster(
-            issue_type=processed.issue_type,
-            location_id=loc_id,
-            status="forming",
-            independent_demand_count=1,
-            raw_message_count=1,
-            uncertainty_notes=processed.uncertainty_notes,
-        )
-        cluster_repo.add_member(
-            cluster_id=new_cluster.id,
-            request_id=req.id,
-            similarity_score=1.0,
-            assignment="auto",
-        )
-
-    db.commit()
 
     return RequestCreateResponse(
         request_id=f"req_{req.id}",
         status=req.status,
         reference_code=req.reference_code,
         issue_type=processed.issue_type,
-        location=resolved_location_name or body.location_text,
+        location=loc_name,
     )
 
 
@@ -155,25 +79,31 @@ def upload_audio(
             },
         )
 
+    import base64
+    from pathlib import Path
+
+    audio_bytes = audio.file.read()
+    audio_base64 = base64.b64encode(audio_bytes).decode("utf-8")
+
     file_name = f"audio_{uuid.uuid4().hex[:8]}_{audio.filename or 'recording.wav'}"
+    uploads_dir = Path(__file__).resolve().parents[2] / "static" / "uploads"
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+    (uploads_dir / file_name).write_bytes(audio_bytes)
     audio_url = f"/static/uploads/{file_name}"
 
-    # Update request
-    req.audio_url = audio_url
-    req.transcript = "[Transcribed voice input via speech-to-text pipeline]"
-    req_repo.add_transcription(
-        request_id=req.id,
-        transcript=req.transcript,
-        stt_model="whisper-base",
-        stt_provider="whisper",
-        confidence=0.88,
+    updated_req, _, _ = ingest_citizen_request(
+        db=db,
+        channel="voice",
+        audio_base64=audio_base64,
+        audio_url=audio_url,
+        language_hint=req.language,
+        existing_request_id=req.id,
     )
-    db.commit()
 
     return AudioUploadResponse(
         request_id=request_id,
         audio_url=audio_url,
-        status="uploaded",
+        status=updated_req.status,
     )
 
 

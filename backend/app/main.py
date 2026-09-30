@@ -27,6 +27,7 @@ from app.api.routes import (
     outcomes,
     requests,
     simulations,
+    webhooks,
 )
 from app.core.config import get_settings
 from app.core.logging import configure_logging
@@ -67,6 +68,7 @@ for router in (
     outcomes.router,
     datasets.router,
     audit.router,
+    webhooks.router,
 ):
     app.include_router(router)
 

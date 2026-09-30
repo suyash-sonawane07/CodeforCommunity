@@ -22,6 +22,7 @@ from ai.nlp import (
     RuleBasedLanguageDetector,
     RuleBasedTextNormalizer,
 )
+from sqlalchemy.orm import Session
 
 
 @dataclass
@@ -57,8 +58,8 @@ def process_citizen_request(
     stt_provider_name = None
     stt_conf = None
 
-    # 1. Voice transcription (if voice channel)
-    if channel == "voice" and audio_base64:
+    # 1. Voice transcription (if audio provided)
+    if audio_base64:
         try:
             stt = get_stt_provider()
             stt_res = stt.transcribe(audio_base64, language_hint=language_hint)
@@ -208,3 +209,149 @@ def process_citizen_request(
         stt_confidence=stt_conf,
         uncertainty_notes=uncertainty_notes,
     )
+
+
+def ingest_citizen_request(
+    db: Session,
+    channel: str,
+    text: Optional[str] = None,
+    audio_base64: Optional[str] = None,
+    audio_url: Optional[str] = None,
+    location_text: Optional[str] = None,
+    language_hint: Optional[str] = None,
+    consent_ack: bool = True,
+    existing_request_id: Optional[int] = None,
+):
+    """Shared end-to-end ingestion pipeline:
+
+    Processes input text/audio, extracts entities & location, assigns to clusters,
+    and updates/creates the database entities with status='processed'.
+    """
+    from app.models import CitizenRequest
+    from app.repositories import ClusterRepository, RequestRepository
+
+    processed = process_citizen_request(
+        channel=channel,
+        text=text,
+        language_hint=language_hint,
+        audio_base64=audio_base64,
+        location_text=location_text,
+    )
+
+    req_repo = RequestRepository(db)
+    cluster_repo = ClusterRepository(db)
+
+    # 1. Location persistence
+    loc_id = None
+    resolved_location_name = None
+    if processed.location_resolved or location_text:
+        admin = processed.admin_hierarchy or {}
+        resolved_location_name = admin.get("village_ward") or admin.get("district") or location_text
+        if not resolved_location_name and processed.entities:
+            for ent in processed.entities:
+                if ent.get("entity_type") in ("location", "place", "facility"):
+                    resolved_location_name = ent.get("value")
+                    break
+
+        loc = req_repo.create_or_get_location(
+            source_text=location_text or processed.raw_text,
+            latitude=processed.latitude,
+            longitude=processed.longitude,
+            state=admin.get("state", "Demo State"),
+            district=admin.get("district", "Demo District 1"),
+            block=admin.get("block", "Demo Block A"),
+            village_ward=resolved_location_name,
+            confidence=0.85 if processed.location_resolved else 0.3,
+            resolution_method="gazetteer_exact"
+            if processed.location_resolved
+            else "unresolved_text",
+            status="resolved" if processed.location_resolved else "location_unresolved",
+        )
+        loc_id = loc.id
+
+    # 2. Request creation or update
+    if existing_request_id:
+        req = db.query(CitizenRequest).filter(CitizenRequest.id == existing_request_id).first()
+        if not req:
+            req = req_repo.create_request(
+                channel=channel,
+                consent_ack=consent_ack,
+                raw_text=text or processed.raw_text,
+                audio_url=audio_url,
+                language=processed.language,
+                transcript=processed.transcript,
+                status="processed",
+                uncertainty_notes=processed.uncertainty_notes,
+            )
+        else:
+            if not req.raw_text:
+                req.raw_text = text or processed.raw_text
+            if processed.transcript:
+                req.transcript = processed.transcript
+            if processed.language:
+                req.language = processed.language
+            if audio_url:
+                req.audio_url = audio_url
+            req.status = "processed"
+            if processed.uncertainty_notes:
+                notes = list(req.uncertainty_notes or [])
+                for n in processed.uncertainty_notes:
+                    if n not in notes:
+                        notes.append(n)
+                req.uncertainty_notes = notes
+    else:
+        req = req_repo.create_request(
+            channel=channel,
+            consent_ack=consent_ack,
+            raw_text=text or processed.raw_text,
+            audio_url=audio_url,
+            language=processed.language,
+            transcript=processed.transcript,
+            status="processed",
+            uncertainty_notes=processed.uncertainty_notes,
+        )
+
+    # 3. Save audio transcription record if available
+    if processed.transcript:
+        req_repo.add_transcription(
+            request_id=req.id,
+            transcript=processed.transcript,
+            stt_model="whisper-base",
+            stt_provider=processed.stt_provider or "whisper",
+            confidence=processed.stt_confidence or 0.88,
+        )
+
+    # 4. Save entities
+    if processed.entities:
+        req_repo.add_entities(req.id, processed.entities)
+
+    # 5. Cluster grouping
+    matching_cluster = cluster_repo.find_matching_cluster(
+        issue_type=processed.issue_type, location_id=loc_id
+    )
+    if matching_cluster:
+        cluster_repo.add_member(
+            cluster_id=matching_cluster.id,
+            request_id=req.id,
+            similarity_score=0.88,
+            assignment="auto",
+        )
+    else:
+        new_cluster = cluster_repo.create_cluster(
+            issue_type=processed.issue_type,
+            location_id=loc_id,
+            status="forming",
+            independent_demand_count=1,
+            raw_message_count=1,
+            uncertainty_notes=processed.uncertainty_notes,
+        )
+        cluster_repo.add_member(
+            cluster_id=new_cluster.id,
+            request_id=req.id,
+            similarity_score=1.0,
+            assignment="auto",
+        )
+
+    db.commit()
+
+    return req, processed, (resolved_location_name or location_text)
