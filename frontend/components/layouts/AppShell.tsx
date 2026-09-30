@@ -80,6 +80,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     localStorage.setItem("civicpulse_active_role", role);
   };
 
+  const isAuthPage = pathname === "/login" || pathname === "/signup";
+  if (isAuthPage) {
+    return <div className="min-h-screen bg-[#f8fafd] text-[#1f1f1f]">{children}</div>;
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-[#f8fafd] text-[#1f1f1f] font-sans">
       {/* ------------------------------------------------------------- Google Top App Bar */}
