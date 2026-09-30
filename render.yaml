@@ -53,3 +53,5 @@ services:
         value: gemini-2.5-flash
       - key: GROQ_API_KEY
         sync: false # Optional: for Groq Whisper transcription
+      - key: NEXT_PUBLIC_CARTO_API_KEY
+        value: cb1_45dd_1_9ec88189693cc185f0b05713

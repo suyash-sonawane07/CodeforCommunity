@@ -56,9 +56,12 @@ export default function MapComponent({
   zoom = 11,
   showInfra = true,
 }: MapComponentProps) {
-  // Tile URLs (CartoDB Voyager looks exactly like Google Maps)
+  const cartoApiKey =
+    process.env.NEXT_PUBLIC_CARTO_API_KEY || 'cb1_45dd_1_9ec88189693cc185f0b05713';
+
+  // Tile URLs (CartoDB Voyager looks exactly like Google Maps, verified with API key to remove watermark)
   const tileUrls = {
-    map: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    map: `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${cartoApiKey}`,
     satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     terrain: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
   };
