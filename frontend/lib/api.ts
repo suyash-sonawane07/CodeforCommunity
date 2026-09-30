@@ -6,10 +6,14 @@
  */
 import { API_BASE_URL } from "./config";
 import type {
+  AuditLogListResponse,
   ClusterDetail,
   ClusterListResponse,
+  DatasetListResponse,
   EvidencePanel,
   GapAnalysisResult,
+  GeoJSONFeatureCollection,
+  InfrastructureLayerResponse,
   OutcomeResponse,
   PriorityBreakdown,
   RequestCreate,
@@ -135,4 +139,30 @@ export const api = {
 
   getOutcome: (id: number, token?: string) =>
     request<OutcomeResponse>(`/clusters/${id}/outcome`, { headers: authHeaders(token) }),
+
+  getGeospatialClusters: (token?: string) =>
+    request<GeoJSONFeatureCollection>("/geospatial/clusters", { headers: authHeaders(token) }),
+
+  getInfrastructure: (token?: string) =>
+    request<InfrastructureLayerResponse>("/infrastructure", { headers: authHeaders(token) }),
+
+  getDatasets: (token?: string) =>
+    request<DatasetListResponse>("/datasets", { headers: authHeaders(token) }),
+
+  getAuditLogs: (token?: string) =>
+    request<AuditLogListResponse>("/audit-logs", { headers: authHeaders(token) }),
+
+  uploadAudio: async (requestId: string, file: Blob, token?: string) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(`${API_BASE_URL}/requests/${requestId}/audio`, {
+      method: "POST",
+      body: formData,
+      headers: authHeaders(token),
+    });
+    if (!res.ok) {
+      throw new ApiError(res.status, "UPLOAD_ERROR", "Audio upload failed");
+    }
+    return res.json();
+  },
 };

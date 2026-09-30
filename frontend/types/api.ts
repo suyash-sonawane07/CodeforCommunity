@@ -74,6 +74,8 @@ export interface ClusterSummary {
   independent_demand_count: number; // FR-024: always shown alongside raw count
   raw_message_count: number;
   district?: string | null;
+  village_ward?: string | null;
+  priority_score?: number | null;
 }
 
 export interface ClusterDetail extends ClusterSummary {
@@ -122,6 +124,8 @@ export interface EvidencePanel {
   priority_factors?: Record<string, unknown> | null;
   uncertainty_notes: string[];
   dataset_versions: string[];
+  evidence_request_ids?: number[];
+  evidence_reference_codes?: string[];
 }
 
 export interface GapAnalysisResult {
@@ -133,6 +137,8 @@ export interface GapAnalysisResult {
   benchmark_used?: string | null;
   conflicting_project?: Record<string, unknown> | null;
   uncertainty_notes: string[];
+  evidence_request_ids?: number[];
+  evidence_reference_codes?: string[];
 }
 
 export interface PriorityBreakdown {
@@ -141,9 +147,11 @@ export interface PriorityBreakdown {
   gap?: number | null;
   impact?: number | null;
   equity_adjustment?: number | null;
+  funded_penalty?: number | null;
   weights?: Record<string, number> | null;
   priority_index?: number | null;
   is_incomplete: boolean; // FR-048
+  evidence_request_ids?: number[];
 }
 
 /* ---------------------------------------------------------------- geo / infra */
