@@ -693,14 +693,14 @@ class GeminiNLPProvider:
 
     name = "gemini"
     ENDPOINT = (
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
     )
 
-    def __init__(self, api_key: str | None = None, model: str = "gemini-1.5-flash") -> None:
+    def __init__(self, api_key: str | None = None, model: str | None = None) -> None:
         import os
 
         self.api_key = api_key or os.getenv("GEMINI_API_KEY")
-        self.model = model
+        self.model = model or os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
         self._cache: dict[str, dict] = {}
         # Rule-based fallbacks
         self._rb_lang = RuleBasedLanguageDetector()
@@ -764,8 +764,11 @@ class GeminiNLPProvider:
             import httpx
 
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}"
-            with httpx.Client(timeout=8.0) as client:
+            with httpx.Client(timeout=10.0) as client:
                 resp = client.post(url, json=payload)
+                if resp.status_code == 404 and self.model != "gemini-3.8-flash":
+                    fallback_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={self.api_key}"
+                    resp = client.post(fallback_url, json=payload)
                 if resp.status_code == 200:
                     data = resp.json()
                     candidates = data.get("candidates", [])

@@ -203,7 +203,7 @@ class GeminiEmbeddingProvider:
 
     name = "gemini"
     ENDPOINT = (
-        "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent"
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent"
     )
 
     def __init__(
@@ -225,7 +225,7 @@ class GeminiEmbeddingProvider:
 
             url = f"{self.ENDPOINT}?key={self.api_key}"
             payload = {
-                "model": "models/text-embedding-004",
+                "model": "models/gemini-embedding-001",
                 "content": {"parts": [{"text": text[:2000]}]},
             }
             with httpx.Client(timeout=5.0) as client:

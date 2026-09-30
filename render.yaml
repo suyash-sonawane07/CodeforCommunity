@@ -42,14 +42,14 @@ services:
       - key: AI_LLM_PROVIDER
         value: gemini # Options: gemini | mock | openai
       - key: AI_STT_PROVIDER
-        value: mock # Options: groq | whisper | mock
+        value: gemini # Options: gemini | groq | whisper | mock
       - key: AI_EMBEDDING_PROVIDER
-        value: mock # Options: gemini | openai | mock
+        value: gemini # Options: gemini | openai | mock
       - key: GEOCODING_PROVIDER
         value: mock # Options: google | osm | mock
       - key: GEMINI_API_KEY
         sync: false # Set your Google Gemini API key in Render Dashboard
       - key: GEMINI_MODEL
-        value: gemini-1.5-flash
+        value: gemini-2.5-flash
       - key: GROQ_API_KEY
         sync: false # Optional: for Groq Whisper transcription
