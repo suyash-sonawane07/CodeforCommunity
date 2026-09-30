@@ -196,7 +196,7 @@ export default function ReviewQueuePage() {
               </span>
             </div>
             <p className="mt-1 text-xs text-[#5f6368]">
-              PRD S-12 • FR-058–063: Mandatory human-in-the-loop sign-off before municipal capital deployment.
+              Mandatory human-in-the-loop sign-off and signed justification before municipal capital deployment.
             </p>
           </div>
 
@@ -228,7 +228,7 @@ export default function ReviewQueuePage() {
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <h3 className="font-google text-sm font-bold text-[#041e49]">
-                  Human-in-the-Loop Governance Guarantee (FR-058)
+                  Human-in-the-Loop Governance Standard
                 </h3>
                 <span className="rounded-full bg-[#ceead6] px-2 py-0.5 text-[10px] font-bold text-[#072711]">
                   Statutory Rule Active
@@ -506,7 +506,7 @@ export default function ReviewQueuePage() {
                   </div>
                   <div>
                     <span className="text-[11px] font-bold uppercase tracking-wider text-[#0b57d0]">
-                      Reviewer Sign-Off • PRD S-12
+                      Municipal Reviewer Sign-Off
                     </span>
                     <h3 className="font-google text-lg font-bold text-[#1f1f1f]">
                       Cluster #{selectedCluster.id}: {selectedCluster.village_ward || selectedCluster.district}

@@ -313,7 +313,7 @@ export default function DemandMapPage() {
                   onClick={() => setSelectedFeature(feat)}
                   className="group relative flex flex-col items-center cursor-pointer transition-all"
                 >
-                  {/* Geodesic Radius Pulse Ring (FR-027) */}
+                  {/* Geodesic Radius Pulse Ring */}
                   <div
                     className={`absolute -top-3 h-20 w-20 rounded-full border-2 transition-all pointer-events-none ${
                       isSelected
@@ -526,7 +526,7 @@ export default function DemandMapPage() {
                   </div>
 
                   <div className="border-t border-[#e0e3e7] pt-2 text-center text-[10px] text-[#747775]">
-                    PostGIS Geodesic Buffer (FR-027) • Fully Explainable
+                    PostGIS Geodesic Buffer • Spatial Proximity Analysis
                   </div>
                 </div>
               </div>

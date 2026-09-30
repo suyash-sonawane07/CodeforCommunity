@@ -93,7 +93,7 @@ export default function CitizenPortalPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!consentAck) {
-      setSubmitError("Consent is required to submit a public development request (FR-005).");
+      setSubmitError("Consent is required to submit a public development request.");
       return;
     }
     if (!text.trim() && !audioFile) {
@@ -421,7 +421,7 @@ export default function CitizenPortalPage() {
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="block text-xs font-bold uppercase tracking-wider text-[#5f6368]">
-                    Location / Village / Ward (FR-033)
+                    Location / Village / Ward
                   </label>
                   <span className="text-[11px] text-[#747775]">Optional text geocoding</span>
                 </div>
@@ -453,7 +453,7 @@ export default function CitizenPortalPage() {
                 </div>
               </div>
 
-              {/* Consent Acknowledgment (FR-005 Required) */}
+              {/* Consent Acknowledgment */}
               <div className="rounded-2xl bg-[#f8fafd] p-4 border border-[#e0e3e7]">
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
@@ -463,7 +463,7 @@ export default function CitizenPortalPage() {
                     className="mt-0.5 h-4 w-4 rounded text-[#0b57d0] focus:ring-[#0b57d0]"
                   />
                   <span className="text-xs text-[#5f6368] leading-relaxed">
-                    <strong className="text-[#1f1f1f]">Consent &amp; Privacy Notice (FR-005):</strong> I consent to this public development request being anonymized, clustered via AI, and processed for municipal infrastructure allocation.
+                    <strong className="text-[#1f1f1f]">Consent &amp; Privacy Notice:</strong> I consent to this public development request being anonymized, clustered via AI, and processed for municipal infrastructure allocation.
                   </span>
                 </label>
               </div>

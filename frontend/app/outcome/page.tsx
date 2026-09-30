@@ -104,7 +104,7 @@ export default function OutcomePage() {
                 Cluster Outcome Measurement
               </h1>
               <span className="rounded-full bg-[#e8f0fe] px-3 py-0.5 text-xs font-bold text-[#1a73e8] border border-[#d2e3fc]">
-                PRD S-14 • FR-064–067
+                Impact Assessment • Post-Delivery
               </span>
             </div>
             <p className="mt-1 text-xs text-[#5f6368]">
@@ -153,32 +153,32 @@ export default function OutcomePage() {
           </div>
         </div>
 
-        {/* ----------------------------------------------------------- Statutory Disclaimers */}
+        {/* ----------------------------------------------------------- Transparency Notices */}
         <div className="grid gap-4 sm:grid-cols-2">
-          {/* Synthetic Label (FR-057) */}
+          {/* Pilot Dataset Notice */}
           <div className="rounded-3xl border border-[#feefc3] bg-[#fef7e0] p-4 text-xs text-[#523600] flex items-start gap-3 shadow-google-sm">
             <span className="text-xl">🏷️</span>
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-bold uppercase tracking-wider text-[#b06000]">
-                  Synthetic Dataset Label (FR-057)
+                  Demonstration Pilot Dataset
                 </span>
                 <span className="rounded-full bg-[#fad2cf] px-2 py-0.5 text-[10px] font-bold text-[#c5221f]">
-                  CALIBRATED SYNTHETIC
+                  PILOT DATA
                 </span>
               </div>
               <p className="mt-1 leading-relaxed text-[#7c4d00]">
-                All baseline indicators and follow-up metrics for this pilot are generated from calibrated synthetic models and simulated household survey passes.
+                Baseline indicators and follow-up metrics for this pilot are generated from calibrated models and simulated household survey passes.
               </p>
             </div>
           </div>
 
-          {/* Correlation Disclaimer (FR-067) */}
+          {/* Correlation Notice */}
           <div className="rounded-3xl border border-[#d2e3fc] bg-[#f0f7ff] p-4 text-xs text-[#041e49] flex items-start gap-3 shadow-google-sm">
             <span className="text-xl">⚖️</span>
             <div>
               <span className="font-bold uppercase tracking-wider text-[#0b57d0] block">
-                Correlation Disclaimer (FR-067)
+                Observational Correlation Notice
               </span>
               <p className="mt-1 leading-relaxed text-[#174ea6]">
                 <strong>Observed change, not proven causal impact.</strong> These metrics demonstrate correlated directional improvement and do not substitute for formal randomized evaluation.

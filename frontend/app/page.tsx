@@ -508,7 +508,7 @@ export default function HomePage() {
               Policy What-If Simulator
             </h3>
             <p className="mt-1 text-xs text-[#5f6368] leading-relaxed">
-              Model budget allocations across Water, Roads, Health, and Energy with real-time recalculations and non-binding disclaimer (FR-056).
+              Model budget allocations across Water, Roads, Health, and Energy with real-time recalculations and advisory policy guidance.
             </p>
             <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-[#b06000]">
               <span>Run Simulation</span>
@@ -594,9 +594,9 @@ export default function HomePage() {
           </div>
 
           <div className="rounded-2xl bg-[#f8fafd] p-5 border border-[#e0e3e7]">
-            <span className="font-bold text-[#1f1f1f] block mb-1 text-sm">🏷️ Synthetic Transparency</span>
+            <span className="font-bold text-[#1f1f1f] block mb-1 text-sm">🏷️ Pilot Simulation Transparency</span>
             <p className="text-[#5f6368] leading-relaxed">
-              Strict compliance with FR-057 &amp; FR-067: All synthetic pilot indicators are explicitly tagged <span className="font-bold text-[#b06000]">SYNTHETIC</span> with full audit traceability.
+              All demonstration indicators are clearly labeled as <span className="font-bold text-[#b06000]">PILOT SIMULATION</span> with full audit traceability and open source methodologies.
             </p>
           </div>
         </div>

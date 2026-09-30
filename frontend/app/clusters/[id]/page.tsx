@@ -114,7 +114,7 @@ export default function ClusterDetailPage({ params }: Props) {
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!reviewNote.trim()) {
-      alert("A review note is required for the audit trail (FR-059/060).");
+      alert("A review note is required to sign off on this cluster.");
       return;
     }
 
@@ -283,8 +283,8 @@ export default function ClusterDetailPage({ params }: Props) {
                 <h2 className="font-google text-base font-bold text-[#1f1f1f]">
                   1. Spatial Infrastructure Gap Analysis
                 </h2>
-                <span className="rounded-full bg-[#f0f4f9] px-2.5 py-0.5 text-[10px] font-mono text-[#5f6368]">
-                  FR-040–044
+                <span className="rounded-full bg-[#f0f4f9] px-2.5 py-0.5 text-[10px] font-semibold text-[#5f6368]">
+                  Verified GIS Assessment
                 </span>
               </div>
 
@@ -325,8 +325,8 @@ export default function ClusterDetailPage({ params }: Props) {
                 <h2 className="font-google text-base font-bold text-[#1f1f1f]">
                   2. Transparent Prioritization Formula Breakdown
                 </h2>
-                <span className="rounded-full bg-[#f0f4f9] px-2.5 py-0.5 text-[10px] font-mono text-[#5f6368]">
-                  FR-045–050
+                <span className="rounded-full bg-[#f0f4f9] px-2.5 py-0.5 text-[10px] font-semibold text-[#5f6368]">
+                  Mathematical Weighting
                 </span>
               </div>
 
@@ -390,8 +390,8 @@ export default function ClusterDetailPage({ params }: Props) {
                 <h3 className="font-google text-sm font-bold text-[#1f1f1f]">
                   Traceable Evidence Dossier
                 </h3>
-                <span className="rounded-full bg-[#f0f4f9] px-2 py-0.5 text-[10px] font-mono text-[#5f6368]">
-                  FR-051
+                <span className="rounded-full bg-[#f0f4f9] px-2 py-0.5 text-[10px] font-semibold text-[#5f6368]">
+                  Verified Records
                 </span>
               </div>
 

@@ -115,7 +115,7 @@ export default function EquityComparisonPage() {
                 Equity Comparison &amp; Bias Correction
               </h1>
               <span className="rounded-full bg-[#e8f0fe] px-3 py-0.5 text-xs font-bold text-[#1a73e8] border border-[#d2e3fc]">
-                PRD S-10 • FR-028, FR-055
+                Algorithmic Fairness &amp; Spatial Equity
               </span>
             </div>
             <p className="mt-1 text-xs text-[#5f6368]">
@@ -149,7 +149,7 @@ export default function EquityComparisonPage() {
             </div>
             <div className="space-y-1">
               <h3 className="font-google text-base font-bold text-[#041e49]">
-                Algorithmic Bias Correction Mandate (FR-028)
+                Algorithmic Fairness &amp; Spatial Bias Correction
               </h3>
               <p className="text-xs text-[#444746] leading-relaxed">
                 Raw digital participation is inherently skewed: affluent urban districts with high smartphone penetration naturally submit more requests than remote rural hamlets. The CivicPulse Equity Engine applies a statutory correction factor balancing <strong>smartphone density, digital literacy, and historical infrastructure deficit</strong> so the most vulnerable habitations are never overshadowed.

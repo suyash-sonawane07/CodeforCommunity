@@ -85,9 +85,9 @@ export default function DatasetsPage() {
         },
         {
           id: 5,
-          name: "Synthetic Pilot Spatial Demographics & Voice Ingest Baseline",
+          name: "Pilot Spatial Demographics & Voice Ingest Baseline",
           source_label: "synthetic",
-          version: "PRD-v1.4",
+          version: "Release-v1.4",
           ingested_at: "2026-09-20T16:00:00Z",
         },
       ];
@@ -182,7 +182,7 @@ export default function DatasetsPage() {
               </span>
             </div>
             <p className="mt-1 text-xs text-[#5f6368]">
-              PRD S-15 • FR-038, FR-062, FR-073: Public BRICS datasets, immutable SHA-256 audit ledger, and AI runtime specifications.
+              Public BRICS geospatial datasets, immutable SHA-256 audit ledger, and verifiable system architecture.
             </p>
           </div>
 
@@ -216,7 +216,7 @@ export default function DatasetsPage() {
                   : "text-[#444746] hover:text-[#1f1f1f]"
               }`}
             >
-              ⚙️ AI &amp; Runtime Config
+              ⚙️ System Architecture
             </button>
           </div>
         </div>
@@ -235,10 +235,10 @@ export default function DatasetsPage() {
               <span className="text-xl">🏷️</span>
               <div>
                 <span className="font-bold uppercase tracking-wider text-[#b06000] block">
-                  Synthetic Dataset Registry Guarantee (FR-057)
+                  Dataset Provenance &amp; Verification Guarantee
                 </span>
                 <p className="mt-0.5 leading-relaxed text-[#7c4d00]">
-                  Every registered dataset strictly carries an immutable <code className="font-mono font-bold text-[#523600]">source_label</code> (&ldquo;confirmed&rdquo;, &ldquo;candidate&rdquo;, or &ldquo;synthetic&rdquo;) and version number. No synthetic pilot baseline is ever conflated with certified national census records.
+                  Every registered dataset strictly carries an immutable <code className="font-mono font-bold text-[#523600]">source_label</code> (&ldquo;confirmed&rdquo;, &ldquo;candidate&rdquo;, or &ldquo;synthetic&rdquo;) and version number. No demonstration pilot baseline is ever conflated with certified national census records.
                 </p>
               </div>
             </div>
@@ -276,7 +276,7 @@ export default function DatasetsPage() {
                       <th className="py-3 px-4">Dataset Name</th>
                       <th className="py-3 px-4">Pilot Jurisdiction</th>
                       <th className="py-3 px-4">Release Version</th>
-                      <th className="py-3 px-4">FR-057 Label</th>
+                      <th className="py-3 px-4">Provenance Tag</th>
                       <th className="py-3 px-4">Ingested Date</th>
                       <th className="py-3 px-4 text-right">Download</th>
                     </tr>
@@ -342,7 +342,7 @@ export default function DatasetsPage() {
               <span className="text-xl">🔒</span>
               <div>
                 <span className="font-bold uppercase tracking-wider text-[#0b57d0] block">
-                  Cryptographically Audited Activity Ledger (FR-062)
+                  Cryptographically Audited Activity Ledger
                 </span>
                 <p className="mt-0.5 leading-relaxed text-[#174ea6]">
                   Every sign-off, threshold override, simulation run, and dataset mutation generates an immutable, tamper-evident hash linked to the reviewer&apos;s authenticated credentials.

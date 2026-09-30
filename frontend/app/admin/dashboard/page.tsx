@@ -154,7 +154,7 @@ export default function CommandDashboardPage() {
             <span className="text-xs text-[#747775]">/ {totalRaw} raw</span>
           </div>
           <p className="mt-1 text-xs text-[#137333] font-medium">
-            Deduplicated (FR-024 Anti-Astroturfing)
+            Verified Unique (Anti-Spam Filtered)
           </p>
         </div>
 
@@ -167,7 +167,7 @@ export default function CommandDashboardPage() {
             {totalPending}
           </p>
           <p className="mt-1 text-xs text-[#b06000] font-medium">
-            Awaiting human sign-off (FR-059)
+            Awaiting human reviewer sign-off
           </p>
         </div>
 

@@ -159,7 +159,7 @@ export default function SimulatorPage() {
                 Policy What-If Simulator
               </h1>
               <span className="rounded-full bg-[#e8f0fe] px-3 py-0.5 text-xs font-bold text-[#1a73e8] border border-[#d2e3fc]">
-                PRD S-13 • FR-056
+                Capital Allocation Modeler
               </span>
             </div>
             <p className="mt-1 text-xs text-[#5f6368]">
@@ -193,7 +193,7 @@ export default function SimulatorPage() {
           <span className="text-xl">⚖️</span>
           <div>
             <span className="font-bold uppercase tracking-wider text-[#b06000] block">
-              Governance Disclaimer (FR-056)
+              Advisory Governance Policy Notice
             </span>
             <p className="mt-0.5 leading-relaxed">
               This simulator is <strong>illustrative and exploratory</strong>, not a binding capital commitment. All municipal allocations require statutory budgetary approval, geotechnical feasibility reports, and sign-off through the Human Review Gate.
