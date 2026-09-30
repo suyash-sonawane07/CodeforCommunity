@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { API_BASE_URL } from "@/lib/config";
 import type { GeoJSONFeature } from "@/types/api";
 import {
@@ -14,6 +15,18 @@ import {
   GoogleLensIcon,
   GeminiSparkleIcon,
 } from "@/components/ui/GoogleIcons";
+
+const InteractiveMap = dynamic(() => import("@/components/MapComponent"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full w-full items-center justify-center bg-[#f0f4f9] text-[#5f6368]">
+      <div className="flex flex-col items-center gap-2">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0b57d0] border-t-transparent" />
+        <span className="text-xs font-semibold">Loading Google Maps GIS Layer...</span>
+      </div>
+    </div>
+  ),
+});
 
 const COUNTRY_REGIONS = [
   { id: "all", label: "All BRICS Hubs" },
@@ -39,7 +52,8 @@ export default function DemandMapPage() {
   );
   const [loading, setLoading] = useState(false);
   const [mapType, setMapType] = useState<"map" | "satellite" | "terrain">("map");
-  const [zoomLevel, setZoomLevel] = useState(12);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([19.482, 75.385]);
+  const [mapZoom, setMapZoom] = useState<number>(11);
   const [showInfraLayer, setShowInfraLayer] = useState(true);
 
   // Filters
@@ -115,8 +129,28 @@ export default function DemandMapPage() {
     return true;
   });
 
+  const handleRegionSelect = (rId: string) => {
+    setRegionFilter(rId);
+    if (rId === "india") {
+      setMapCenter([19.482, 75.385]);
+      setMapZoom(11);
+    } else if (rId === "brazil") {
+      setMapCenter([-22.859, -43.245]);
+      setMapZoom(12);
+    } else if (rId === "south_africa") {
+      setMapCenter([-26.271, 27.859]);
+      setMapZoom(12);
+    } else {
+      setMapCenter([10, 20]);
+      setMapZoom(3);
+    }
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-7xl mx-auto">
+      {/* Google 4-Color Accent Strip */}
+      <div className="h-1.5 w-full rounded-full bg-gradient-to-r from-[#4285F4] via-[#EA4335] via-[#FBBC05] to-[#34A853]" />
+
       {/* ------------------------------------------------------------- Top Info Bar */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -149,31 +183,30 @@ export default function DemandMapPage() {
 
       {/* ------------------------------------------------------------- Google Maps Viewport Container */}
       <div className="relative h-[650px] w-full overflow-hidden rounded-3xl border border-[#dadce0] bg-[#e5e3df] shadow-google-md">
-        {/* Map Canvas Background (Simulating Google Maps Canvas) */}
-        <div
-          className={`absolute inset-0 transition-opacity duration-300 ${
-            mapType === "satellite"
-              ? "bg-[#11241a] bg-[radial-gradient(#1f3f2f_1px,transparent_1px)] [background-size:24px_24px]"
-              : mapType === "terrain"
-              ? "bg-[#e8ece9] bg-[radial-gradient(#d0dad2_2px,transparent_2px)] [background-size:32px_32px]"
-              : "bg-[#f4f3f0] bg-[radial-gradient(#e0ded8_1px,transparent_1px)] [background-size:20px_20px]"
-          }`}
-        >
-          {/* Simulated Google Maps Roads and Boundaries Grid */}
-          <svg className="absolute inset-0 h-full w-full opacity-40" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="road-grid" width="120" height="120" patternUnits="userSpaceOnUse">
-                <path d="M 0 60 L 120 60 M 60 0 L 60 120" fill="none" stroke="#ffffff" strokeWidth="6" />
-                <path d="M 0 60 L 120 60 M 60 0 L 60 120" fill="none" stroke="#d5d0c8" strokeWidth="3" />
-                <circle cx="60" cy="60" r="4" fill="#c0b8aa" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#road-grid)" />
-          </svg>
+        {/* Real Interactive Map Canvas */}
+        <div className="absolute inset-0 z-0">
+          <InteractiveMap
+            features={filteredFeatures}
+            selectedFeature={selectedFeature}
+            onSelectFeature={(feat: any) => {
+              setSelectedFeature(feat);
+              if (feat.geometry?.coordinates) {
+                setMapCenter([feat.geometry.coordinates[1], feat.geometry.coordinates[0]]);
+                setMapZoom(13);
+              } else if (feat.lat && feat.lng) {
+                setMapCenter([feat.lat, feat.lng]);
+                setMapZoom(13);
+              }
+            }}
+            mapType={mapType}
+            center={mapCenter}
+            zoom={mapZoom}
+            showInfra={showInfraLayer}
+          />
         </div>
 
         {/* ----------------------------------------------------------- Floating Google Maps Search & Filter Card (Top Left) */}
-        <div className="absolute left-4 top-4 z-20 w-80 sm:w-96 space-y-2">
+        <div className="absolute left-4 top-4 z-20 w-80 sm:w-96 space-y-2 pointer-events-auto">
           {/* Search Box */}
           <div className="flex items-center gap-2 rounded-full border border-[#dadce0] bg-white px-4 py-2.5 shadow-google-md">
             <GoogleSearchIcon className="h-4 w-4 text-[#5f6368]" />
@@ -200,7 +233,7 @@ export default function DemandMapPage() {
             {COUNTRY_REGIONS.map((r) => (
               <button
                 key={r.id}
-                onClick={() => setRegionFilter(r.id)}
+                onClick={() => handleRegionSelect(r.id)}
                 className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-medium transition ${
                   regionFilter === r.id
                     ? "bg-[#0b57d0] text-white shadow-sm"
@@ -211,6 +244,7 @@ export default function DemandMapPage() {
               </button>
             ))}
           </div>
+
 
           {/* Sector Filter Chips */}
           <div className="flex gap-1.5 overflow-x-auto rounded-2xl bg-white/90 p-2 shadow-google-sm backdrop-blur-md">
@@ -249,7 +283,7 @@ export default function DemandMapPage() {
         </div>
 
         {/* ----------------------------------------------------------- Map Canvas: Interactive Pins & Clusters */}
-        <div className="relative z-10 flex h-full w-full items-center justify-center p-8">
+        <div className="hidden">
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-10 max-w-3xl w-full">
             {filteredFeatures.map((feat) => {
               const props = (feat.properties || {}) as Record<string, any>;
@@ -330,14 +364,14 @@ export default function DemandMapPage() {
           {/* Zoom Controls (+ / -) */}
           <div className="flex flex-col overflow-hidden rounded-2xl border border-[#dadce0] bg-white shadow-google-md">
             <button
-              onClick={() => setZoomLevel((z) => Math.min(z + 1, 18))}
+              onClick={() => setMapZoom((z) => Math.min(z + 1, 18))}
               className="flex h-10 w-10 items-center justify-center text-lg font-bold text-[#5f6368] hover:bg-[#f0f4f9] transition border-b border-[#dadce0]"
               aria-label="Zoom In"
             >
               +
             </button>
             <button
-              onClick={() => setZoomLevel((z) => Math.max(z - 1, 4))}
+              onClick={() => setMapZoom((z) => Math.max(z - 1, 4))}
               className="flex h-10 w-10 items-center justify-center text-lg font-bold text-[#5f6368] hover:bg-[#f0f4f9] transition"
               aria-label="Zoom Out"
             >
@@ -371,7 +405,7 @@ export default function DemandMapPage() {
           <span>•</span>
           <span>PostGIS ST_DWithin Buffer: 650m</span>
           <span>•</span>
-          <span>Zoom: {zoomLevel}x</span>
+          <span>Zoom: {mapZoom}x</span>
         </div>
       </div>
 

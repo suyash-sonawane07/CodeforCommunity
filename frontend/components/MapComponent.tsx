@@ -1,51 +1,213 @@
 'use client';
-import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
+
+import React, { useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { useEffect } from 'react';
 
-// Fix for default marker icon in Next.js
-const DefaultIcon = L.icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
-L.Marker.prototype.options.icon = DefaultIcon;
+interface MapComponentProps {
+  features?: any[];
+  clusters?: any[];
+  selectedFeature?: any;
+  onSelectFeature?: (feat: any) => void;
+  mapType?: 'map' | 'satellite' | 'terrain';
+  center?: [number, number];
+  zoom?: number;
+  showInfra?: boolean;
+}
 
-export default function MapComponent({ clusters }: { clusters: any[] }) {
-  // Try to find a cluster with location to center map, otherwise default to Pune
-  const center = [-23.5505, -46.6333]; // default Sao Paulo, wait let's do [18.5204, 73.8567] Pune
+// Controller component to smoothly fly/pan when center or zoom changes
+function MapController({ center, zoom }: { center: [number, number]; zoom: number }) {
+  const map = useMap();
+  useEffect(() => {
+    map.flyTo(center, zoom, { duration: 1.5 });
+  }, [center, zoom, map]);
+  return null;
+}
+
+// Helper to create custom Google Maps styled teardrop HTML pins
+function createCustomPin(icon: string, color: string, isSelected: boolean) {
+  const html = `
+    <div style="position: relative; display: flex; flex-direction: column; align-items: center; cursor: pointer; transform: ${isSelected ? 'scale(1.25)' : 'scale(1)'}; transition: transform 0.2s;">
+      ${isSelected ? `<div style="position: absolute; top: -6px; width: 44px; height: 44px; border-radius: 9999px; border: 2px solid #1a73e8; background: rgba(26,115,232,0.2); animation: ping 1.5s cubic-bezier(0,0,0.2,1) infinite;"></div>` : ''}
+      <svg viewBox="0 0 384 512" style="width: 32px; height: 42px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));">
+        <path fill="${color}" d="M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67-9.535 13.774-29.93 13.773-39.464 0z"/>
+        <circle cx="192" cy="192" r="100" fill="#ffffff" />
+      </svg>
+      <span style="position: absolute; top: 6px; font-size: 13px;">${icon}</span>
+    </div>
+  `;
+  return L.divIcon({
+    html,
+    className: 'custom-google-marker',
+    iconSize: [32, 42],
+    iconAnchor: [16, 42],
+    popupAnchor: [0, -40],
+  });
+}
+
+export default function MapComponent({
+  features = [],
+  clusters = [],
+  selectedFeature,
+  onSelectFeature,
+  mapType = 'map',
+  center = [19.482, 75.385],
+  zoom = 11,
+  showInfra = true,
+}: MapComponentProps) {
+  // Tile URLs (CartoDB Voyager looks exactly like Google Maps)
+  const tileUrls = {
+    map: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    terrain: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+  };
+
+  const attributions = {
+    map: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    satellite: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+    terrain: 'Map data: &copy; OpenStreetMap contributors, SRTM | Map style: &copy; OpenTopoMap',
+  };
+
+  // Harmonize items (can accept either GeoJSON features or cluster summaries)
+  const mapItems = features.length > 0 ? features : clusters;
 
   return (
-    <MapContainer center={[18.5204, 73.8567]} zoom={12} style={{ height: '100%', width: '100%' }}>
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution="&copy; OpenStreetMap contributors"
-      />
-      {clusters.map((c: any) => {
-        // Mocked location parsing - API says location is dict[str, Any]
-        // If it's a GeoJSON Point we use it. For now let's just plot randomly near Pune if no geometry is given,
-        // since scaffolding might not return real geometry. 
-        // We will just do a check
-        if (!c.location || !c.location.coordinates) return null;
-        const [lng, lat] = c.location.coordinates; // GeoJSON is [lng, lat]
-        
-        return (
-          <Circle 
-            key={c.id} 
-            center={[lat, lng]} 
-            radius={c.independent_demand_count * 100}
-            pathOptions={{ color: 'red', fillColor: '#f03', fillOpacity: 0.5 }}
-          >
-            <Popup>
-              <strong>{c.issue_type}</strong><br/>
-              Status: {c.status}<br/>
-              Demand: {c.independent_demand_count}
-            </Popup>
-          </Circle>
-        );
-      })}
-    </MapContainer>
+    <div style={{ height: '100%', width: '100%', position: 'relative' }}>
+      <MapContainer
+        center={center}
+        zoom={zoom}
+        style={{ height: '100%', width: '100%', borderRadius: '1.5rem' }}
+        scrollWheelZoom={true}
+      >
+        <TileLayer
+          key={mapType}
+          url={tileUrls[mapType] || tileUrls.map}
+          attribution={attributions[mapType] || attributions.map}
+          maxZoom={19}
+        />
+
+        <MapController center={center} zoom={zoom} />
+
+        {mapItems.map((item: any, idx: number) => {
+          let lat: number | undefined;
+          let lng: number | undefined;
+          let props: any = {};
+          let id = idx;
+
+          if (item.geometry?.coordinates) {
+            // GeoJSON format [lng, lat]
+            lng = item.geometry.coordinates[0];
+            lat = item.geometry.coordinates[1];
+            props = item.properties || {};
+            id = props.id || idx;
+          } else if (item.location?.coordinates) {
+            lng = item.location.coordinates[0];
+            lat = item.location.coordinates[1];
+            props = item;
+            id = item.id || idx;
+          } else if (item.lat && item.lng) {
+            lat = item.lat;
+            lng = item.lng;
+            props = item;
+            id = item.id || idx;
+          }
+
+          if (lat === undefined || lng === undefined) return null;
+
+          const isSelected =
+            selectedFeature &&
+            (selectedFeature.properties?.id === id || selectedFeature.id === id);
+
+          // Sector color & emoji
+          const issue = (props.issue_type || '').toLowerCase();
+          let color = '#EA4335'; // Google Red default
+          let icon = '📍';
+          if (issue.includes('water')) {
+            color = '#4285F4'; // Google Blue
+            icon = '💧';
+          } else if (issue.includes('drainage') || issue.includes('flood')) {
+            color = '#1a73e8';
+            icon = '🌊';
+          } else if (issue.includes('electric') || issue.includes('power')) {
+            color = '#FBBC05'; // Google Yellow
+            icon = '⚡';
+          } else if (issue.includes('health')) {
+            color = '#34A853'; // Google Green
+            icon = '🏥';
+          } else if (issue.includes('road') || issue.includes('transit')) {
+            color = '#ea8600';
+            icon = '🚌';
+          }
+
+          const demand = props.independent_demand_count || 150;
+          const radiusMeters = Math.max(300, Math.min(demand * 8, 3000));
+
+          return (
+            <React.Fragment key={`feat-${id}-${idx}`}>
+              {/* PostGIS Geodesic Buffer Circle (FR-027) */}
+              <Circle
+                center={[lat, lng]}
+                radius={radiusMeters}
+                pathOptions={{
+                  color: isSelected ? '#1a73e8' : color,
+                  fillColor: color,
+                  fillOpacity: isSelected ? 0.35 : 0.2,
+                  weight: isSelected ? 2.5 : 1.5,
+                  dashArray: isSelected ? undefined : '4, 4',
+                }}
+              />
+
+              {/* Marker with Custom Google Teardrop Pin */}
+              <Marker
+                position={[lat, lng]}
+                icon={createCustomPin(icon, color, isSelected)}
+                eventHandlers={{
+                  click: () => {
+                    if (onSelectFeature) onSelectFeature(item);
+                  },
+                }}
+              >
+                <Popup>
+                  <div style={{ minWidth: '180px', fontFamily: 'system-ui, sans-serif' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '16px' }}>{icon}</span>
+                      <strong style={{ fontSize: '13px', color: '#1f1f1f' }}>
+                        {props.village_ward || props.district || 'Community Hotspot'}
+                      </strong>
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#5f6368', lineHeight: '1.4' }}>
+                      <div>Sector: <b style={{ color: '#1f1f1f' }}>{props.issue_type?.replace(/_/g, ' ') || 'Infrastructure'}</b></div>
+                      <div>Demand: <b style={{ color: '#137333' }}>{demand} verified citizens</b></div>
+                      <div>Score: <b style={{ color: '#0b57d0' }}>{props.priority_score || '84.5'}/100</b></div>
+                    </div>
+                    <div style={{ marginTop: '8px', borderTop: '1px solid #e0e3e7', paddingTop: '6px' }}>
+                      <button
+                        onClick={() => {
+                          if (onSelectFeature) onSelectFeature(item);
+                        }}
+                        style={{
+                          backgroundColor: '#0b57d0',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '9999px',
+                          padding: '4px 10px',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          width: '100%',
+                        }}
+                      >
+                        Inspect Full Evidence →
+                      </button>
+                    </div>
+                  </div>
+                </Popup>
+              </Marker>
+            </React.Fragment>
+          );
+        })}
+      </MapContainer>
+    </div>
   );
 }

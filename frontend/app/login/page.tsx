@@ -1,89 +1,124 @@
-'use client';
-import { useState, Suspense } from 'react';
-import { useAuth } from '@/hooks';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+"use client";
+
+import React, { useState, Suspense } from "react";
+import { useAuth } from "@/hooks";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { GoogleLogoMark } from "@/components/ui/GoogleIcons";
 
 function LoginForm() {
   const { login, loading, error } = useAuth();
   const searchParams = useSearchParams();
-  const expired = searchParams.get('expired');
-  
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  
+  const expired = searchParams.get("expired");
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     login(email, password);
   };
 
   const fillDemoUser = () => {
-    setEmail('user@demo.com');
-    setPassword('demo123');
+    setEmail("user@demo.com");
+    setPassword("demo123");
   };
 
   const fillDemoSupervisor = () => {
-    setEmail('supervisor@demo.com');
-    setPassword('demo123');
+    setEmail("supervisor@demo.com");
+    setPassword("demo123");
   };
-  
+
   return (
-    <div className="w-full max-w-md bg-surface rounded-2xl shadow-lg border border-outline-variant p-6">
-      <h1 className="text-2xl font-bold mb-4">CivicPulse Login</h1>
-      
+    <div className="w-full max-w-md rounded-3xl border border-[#dadce0] bg-white p-8 shadow-google-md space-y-6">
+      {/* Google 4-Color Accent Strip */}
+      <div className="h-1 w-full rounded-full bg-gradient-to-r from-[#4285F4] via-[#EA4335] via-[#FBBC05] to-[#34A853]" />
+
+      <div className="text-center space-y-2">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-black/5">
+          <GoogleLogoMark className="h-7 w-7" />
+        </div>
+        <h1 className="font-google text-2xl font-bold tracking-tight text-[#1f1f1f]">
+          CivicPulse Sign-In
+        </h1>
+        <p className="text-xs text-[#5f6368]">
+          Sign in to access your citizen requests &amp; community petitions
+        </p>
+      </div>
+
       {expired && !error && (
-        <div className="bg-warning-container text-on-warning-container p-3 rounded-lg mb-4 text-sm">
-          Your session has expired. Please log in again.
+        <div className="rounded-2xl border border-[#feefc3] bg-[#fef7e0] p-3 text-xs font-semibold text-[#523600]">
+          Your session has expired. Please sign in again.
         </div>
       )}
 
       {error && (
-        <div className="bg-error-container text-on-error-container p-3 rounded-lg mb-4 text-sm">
-          {error}
+        <div className="rounded-2xl border border-[#fad2cf] bg-[#fce8e6] p-3 text-xs font-semibold text-[#c5221f]">
+          ⚠️ {error}
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Email</label>
-          <input 
-            type="email" 
-            className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-2"
+          <label className="block text-xs font-semibold text-[#444746] mb-1">Email</label>
+          <input
+            type="email"
+            className="w-full rounded-2xl border border-[#dadce0] bg-[#f8fafd] px-4 py-2.5 text-xs text-[#1f1f1f] focus:border-[#0b57d0] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#0b57d0]"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required 
+            required
+            placeholder="citizen@example.com"
           />
         </div>
+
         <div>
-          <label className="block text-sm font-medium mb-1">Password</label>
-          <input 
-            type="password" 
-            className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-2"
+          <label className="block text-xs font-semibold text-[#444746] mb-1">Password</label>
+          <input
+            type="password"
+            className="w-full rounded-2xl border border-[#dadce0] bg-[#f8fafd] px-4 py-2.5 text-xs text-[#1f1f1f] focus:border-[#0b57d0] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#0b57d0]"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required 
+            required
+            placeholder="••••••••"
           />
         </div>
-        
-        <button 
-          type="submit" 
+
+        <button
+          type="submit"
           disabled={loading}
-          className="w-full bg-primary-container text-on-primary py-2 rounded-lg font-semibold"
+          className="w-full rounded-full bg-[#0b57d0] py-3 text-xs font-bold text-white shadow-google-sm hover:bg-[#0842a0] hover:shadow-google-md transition disabled:opacity-50"
         >
-          {loading ? 'Signing in...' : 'Sign in'}
+          {loading ? "Signing in..." : "Continue to CivicPulse →"}
         </button>
       </form>
-      
-      <div className="mt-6 flex flex-col gap-2">
-        <p className="text-sm text-center text-slate-500">Quick fill demo accounts:</p>
+
+      <div className="pt-2 border-t border-[#edf2fa] space-y-3">
+        <p className="text-[11px] text-center text-[#5f6368] font-medium">Quick fill demo accounts:</p>
         <div className="flex gap-2 justify-center">
-          <button onClick={fillDemoUser} type="button" className="text-xs bg-slate-200 hover:bg-slate-300 py-1 px-3 rounded-full text-slate-800">Demo User</button>
-          <button onClick={fillDemoSupervisor} type="button" className="text-xs bg-slate-200 hover:bg-slate-300 py-1 px-3 rounded-full text-slate-800">Demo Supervisor</button>
+          <button
+            onClick={fillDemoUser}
+            type="button"
+            className="rounded-full bg-[#f0f4f9] px-3.5 py-1 text-xs font-semibold text-[#1f1f1f] hover:bg-[#e0e3e7] transition border border-[#dadce0]"
+          >
+            👤 Demo Citizen
+          </button>
+          <button
+            onClick={fillDemoSupervisor}
+            type="button"
+            className="rounded-full bg-[#f0f4f9] px-3.5 py-1 text-xs font-semibold text-[#1f1f1f] hover:bg-[#e0e3e7] transition border border-[#dadce0]"
+          >
+            🛡️ Demo Supervisor
+          </button>
         </div>
       </div>
 
-      <div className="mt-4 text-center text-sm">
-        <Link href="/signup" className="text-primary hover:underline">Need an account? Sign up</Link>
+      <div className="text-center text-xs text-[#5f6368] pt-2">
+        <Link href="/admin" className="text-[#0b57d0] hover:underline font-semibold block mb-1">
+          Are you a municipal official or reviewer? Sign in here →
+        </Link>
+        <Link href="/signup" className="text-[#5f6368] hover:underline">
+          Need a citizen account? Sign up
+        </Link>
       </div>
     </div>
   );
@@ -91,8 +126,14 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-surface-container flex items-center justify-center p-4">
-      <Suspense fallback={<div className="w-full max-w-md bg-surface rounded-2xl shadow-lg border border-outline-variant p-6 text-center">Loading...</div>}>
+    <div className="min-h-screen bg-[#f8fafd] flex items-center justify-center p-4">
+      <Suspense
+        fallback={
+          <div className="w-full max-w-md rounded-3xl border border-[#dadce0] bg-white p-8 text-center text-xs text-[#5f6368]">
+            Loading CivicPulse sign-in...
+          </div>
+        }
+      >
         <LoginForm />
       </Suspense>
     </div>
