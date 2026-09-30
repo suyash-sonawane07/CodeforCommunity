@@ -20,7 +20,7 @@ services:
     region: oregon
     plan: free
     buildCommand: "pip install --upgrade pip && pip install -r backend/requirements.txt -r ai/requirements.txt"
-    startCommand: "cd backend && PYTHONPATH=..:$PYTHONPATH alembic upgrade head && PYTHONPATH=..:$PYTHONPATH python -m app.db.seed && PYTHONPATH=..:$PYTHONPATH uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    startCommand: "cd backend && PYTHONPATH=..:$PYTHONPATH python scripts/start.py"
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
