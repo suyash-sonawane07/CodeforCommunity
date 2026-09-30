@@ -69,22 +69,119 @@ def check_and_prepare_database():
         print("-" * 70 + "\n")
 
 
+def find_frontend_standalone():
+    """Look for compiled Next.js standalone server.js."""
+    candidates = [
+        os.path.join(BACKEND_DIR, "..", "frontend", ".next", "standalone", "server.js"),
+        os.path.join(BACKEND_DIR, "frontend", ".next", "standalone", "server.js"),
+        "/code/frontend/.next/standalone/server.js",
+        "/app/frontend/.next/standalone/server.js",
+    ]
+    for path in candidates:
+        norm = os.path.abspath(path)
+        if os.path.isfile(norm):
+            return norm
+    return None
+
+
 def start_server():
-    port = os.environ.get("PORT", "8000")
-    print(f"[INFO] Launching Uvicorn on 0.0.0.0:{port}...")
-    os.execvp(
-        sys.executable,
+    public_port = os.environ.get("PORT", "8000")
+    standalone_server = find_frontend_standalone()
+
+    if not standalone_server:
+        print(f"[INFO] Frontend standalone not found. Launching FastAPI on 0.0.0.0:{public_port}...")
+        os.execvp(
+            sys.executable,
+            [
+                sys.executable,
+                "-m",
+                "uvicorn",
+                "app.main:app",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                public_port,
+            ],
+        )
+        return
+
+    # Dual-service mode: FastAPI on 127.0.0.1:8000, Next.js on 0.0.0.0:$PORT
+    print("=" * 70)
+    print("Starting Unified CivicPulse Server (Next.js Frontend + FastAPI Backend)")
+    print(f"Public Port (Next.js): {public_port}")
+    print("Internal Port (FastAPI): 8000")
+    print("=" * 70)
+
+    import signal
+    import urllib.request
+
+    print("[INFO] Launching FastAPI backend on 127.0.0.1:8000...")
+    fastapi_proc = subprocess.Popen(
         [
             sys.executable,
             "-m",
             "uvicorn",
             "app.main:app",
             "--host",
-            "0.0.0.0",
+            "127.0.0.1",
             "--port",
-            port,
+            "8000",
         ],
+        cwd=BACKEND_DIR,
     )
+
+    # Wait for FastAPI to be responsive
+    for attempt in range(1, 20):
+        try:
+            with urllib.request.urlopen("http://127.0.0.1:8000/health", timeout=1) as resp:
+                if resp.status == 200:
+                    print(f"[OK] FastAPI backend verified on attempt {attempt}.")
+                    break
+        except Exception:
+            time.sleep(0.5)
+
+    standalone_dir = os.path.dirname(standalone_server)
+    frontend_env = os.environ.copy()
+    frontend_env["PORT"] = public_port
+    frontend_env["HOSTNAME"] = "0.0.0.0"
+    frontend_env["BACKEND_URL"] = "http://127.0.0.1:8000"
+    frontend_env["NEXT_PUBLIC_API_URL"] = "/api/proxy"
+
+    print(f"[INFO] Launching Next.js frontend on 0.0.0.0:{public_port}...")
+    nextjs_proc = subprocess.Popen(
+        ["node", "server.js"],
+        cwd=standalone_dir,
+        env=frontend_env,
+    )
+
+    def shutdown(signum=None, frame=None):
+        print("\n[INFO] Shutting down services...")
+        try:
+            nextjs_proc.terminate()
+        except Exception:
+            pass
+        try:
+            fastapi_proc.terminate()
+        except Exception:
+            pass
+        sys.exit(0)
+
+    signal.signal(signal.SIGTERM, shutdown)
+    signal.signal(signal.SIGINT, shutdown)
+
+    try:
+        while True:
+            if fastapi_proc.poll() is not None:
+                print(f"[WARN] FastAPI backend process exited (code {fastapi_proc.returncode}).")
+                shutdown()
+                break
+            if nextjs_proc.poll() is not None:
+                print(f"[WARN] Next.js frontend process exited (code {nextjs_proc.returncode}).")
+                shutdown()
+                break
+            time.sleep(1)
+    except KeyboardInterrupt:
+        shutdown()
 
 
 if __name__ == "__main__":
