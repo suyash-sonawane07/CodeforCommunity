@@ -25,9 +25,9 @@ class ClusterRepository:
         if status:
             query = query.filter(NeedsCluster.status == status)
         if district:
-            query = query.join(Location, NeedsCluster.location_id == Location.id, isouter=True).filter(
-                Location.district.ilike(f"%{district}%")
-            )
+            query = query.join(
+                Location, NeedsCluster.location_id == Location.id, isouter=True
+            ).filter(Location.district.ilike(f"%{district}%"))
         return query.order_by(NeedsCluster.id.asc()).all()
 
     def get_by_id(self, cluster_id: int) -> Optional[NeedsCluster]:
@@ -106,7 +106,12 @@ class ClusterRepository:
         if cluster:
             cluster.raw_message_count += 1
             # Simple deduplication heuristic: count independent demand
-            cluster.independent_demand_count = max(1, cluster.raw_message_count - 1 if cluster.raw_message_count > 2 else cluster.raw_message_count)
+            cluster.independent_demand_count = max(
+                1,
+                cluster.raw_message_count - 1
+                if cluster.raw_message_count > 2
+                else cluster.raw_message_count,
+            )
 
         self.db.flush()
         return member

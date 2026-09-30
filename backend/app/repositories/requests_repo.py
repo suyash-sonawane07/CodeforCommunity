@@ -60,11 +60,7 @@ class RequestRepository:
         # Try int ID or string ID (e.g. req_123 or 123)
         clean_id = identifier.replace("req_", "")
         if clean_id.isdigit():
-            return (
-                self.db.query(CitizenRequest)
-                .filter(CitizenRequest.id == int(clean_id))
-                .first()
-            )
+            return self.db.query(CitizenRequest).filter(CitizenRequest.id == int(clean_id)).first()
         return None
 
     def add_transcription(
@@ -86,9 +82,7 @@ class RequestRepository:
         self.db.flush()
         return transcription
 
-    def add_entities(
-        self, request_id: int, entities: list[dict]
-    ) -> list[ExtractedEntity]:
+    def add_entities(self, request_id: int, entities: list[dict]) -> list[ExtractedEntity]:
         created = []
         for ent in entities:
             rec = ExtractedEntity(

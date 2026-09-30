@@ -42,6 +42,7 @@ def run_scenario(payload: SimulationInput, db=None) -> SimulationOutput:
     total_clusters = 1
     if db is not None:
         from app.models import NeedsCluster
+
         total_clusters = db.query(NeedsCluster).count() or 1
 
     # Baseline coverable clusters before new allocation

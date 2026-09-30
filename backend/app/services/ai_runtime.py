@@ -83,7 +83,9 @@ def process_citizen_request(
         else:
             # Try rule-based fallback
             rb_lang = RuleBasedLanguageDetector().detect(effective_text)
-            detected_lang = rb_lang.language if rb_lang.language != "unknown" else (language_hint or "en")
+            detected_lang = (
+                rb_lang.language if rb_lang.language != "unknown" else (language_hint or "en")
+            )
     except Exception:
         detected_lang = language_hint or "en"
 
@@ -116,15 +118,21 @@ def process_citizen_request(
         ner_res = extractor.extract(normalized)
         if ner_res:
             for e in ner_res:
-                entities_list.append({"entity_type": e.entity_type, "value": e.value, "confidence": e.confidence})
+                entities_list.append(
+                    {"entity_type": e.entity_type, "value": e.value, "confidence": e.confidence}
+                )
         else:
             rb_ner = RuleBasedEntityExtractor().extract(normalized)
             for e in rb_ner:
-                entities_list.append({"entity_type": e.entity_type, "value": e.value, "confidence": e.confidence})
+                entities_list.append(
+                    {"entity_type": e.entity_type, "value": e.value, "confidence": e.confidence}
+                )
     except Exception:
         rb_ner = RuleBasedEntityExtractor().extract(normalized)
         for e in rb_ner:
-            entities_list.append({"entity_type": e.entity_type, "value": e.value, "confidence": e.confidence})
+            entities_list.append(
+                {"entity_type": e.entity_type, "value": e.value, "confidence": e.confidence}
+            )
 
     # 6. Geocoding
     loc_resolved = False
@@ -135,7 +143,11 @@ def process_citizen_request(
 
     if not target_loc_str:
         # Check if an extracted entity contained a place
-        places = [e["value"] for e in entities_list if e.get("entity_type") in ("place", "facility")]
+        places = [
+            e["value"]
+            for e in entities_list
+            if e.get("entity_type") in ("place", "facility", "location")
+        ]
         if places:
             target_loc_str = places[0]
 
@@ -156,7 +168,9 @@ def process_citizen_request(
                     lon = rb_geo.longitude
                     admin_hier = rb_geo.admin_hierarchy
                 else:
-                    uncertainty_notes.append(f"Location '{target_loc_str}' unverified; queued for human geocoding.")
+                    uncertainty_notes.append(
+                        f"Location '{target_loc_str}' unverified; queued for human geocoding."
+                    )
         except Exception:
             rb_geo = GazetteerGeocoder().geocode(target_loc_str)
             if rb_geo.resolved:

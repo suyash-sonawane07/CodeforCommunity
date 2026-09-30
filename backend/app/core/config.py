@@ -38,6 +38,13 @@ class Settings(BaseSettings):
     AI_EMBEDDING_PROVIDER: str = "mock"
     GEOCODING_PROVIDER: str = "mock"
 
+    # AI provider credentials and model configurations
+    GEMINI_API_KEY: str = ""
+    GROQ_API_KEY: str = ""
+    OPENAI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-1.5-flash"
+    OPENAI_MODEL: str = "gpt-4o-mini"
+
     @property
     def cors_origins(self) -> list[str]:
         return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]

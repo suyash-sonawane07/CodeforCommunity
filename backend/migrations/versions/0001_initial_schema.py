@@ -18,7 +18,9 @@ branch_labels = None
 depends_on = None
 
 # (table name → columns) created in FK-dependency order.
-created_at = sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False)
+created_at = sa.Column(
+    "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+)
 
 
 def upgrade() -> None:
@@ -53,9 +55,7 @@ def upgrade() -> None:
         sa.Column("uncertainty_notes", sa.Text(), nullable=True),
         created_at,
     )
-    op.create_index(
-        "ix_locations_geom", "locations", ["geom"], postgresql_using="gist"
-    )
+    op.create_index("ix_locations_geom", "locations", ["geom"], postgresql_using="gist")
 
     op.create_table(
         "citizen_requests",
@@ -73,7 +73,12 @@ def upgrade() -> None:
         sa.Column("source", sa.String(length=30), nullable=False),
         created_at,
     )
-    op.create_index(op.f("ix_citizen_requests_reference_code"), "citizen_requests", ["reference_code"], unique=True)
+    op.create_index(
+        op.f("ix_citizen_requests_reference_code"),
+        "citizen_requests",
+        ["reference_code"],
+        unique=True,
+    )
 
     op.create_table(
         "request_transcriptions",
@@ -85,7 +90,9 @@ def upgrade() -> None:
         sa.Column("transcript", sa.Text(), nullable=True),
         created_at,
     )
-    op.create_index(op.f("ix_request_transcriptions_request_id"), "request_transcriptions", ["request_id"])
+    op.create_index(
+        op.f("ix_request_transcriptions_request_id"), "request_transcriptions", ["request_id"]
+    )
 
     op.create_table(
         "extracted_entities",
@@ -122,7 +129,9 @@ def upgrade() -> None:
         sa.Column("attributes", sa.Text(), nullable=True),
         created_at,
     )
-    op.create_index(op.f("ix_infrastructure_assets_asset_type"), "infrastructure_assets", ["asset_type"])
+    op.create_index(
+        op.f("ix_infrastructure_assets_asset_type"), "infrastructure_assets", ["asset_type"]
+    )
 
     op.create_table(
         "demographic_indicators",
@@ -185,7 +194,9 @@ def upgrade() -> None:
         sa.Column("cluster_id", sa.Integer(), sa.ForeignKey("needs_clusters.id"), nullable=False),
         sa.Column("gap_found", sa.Boolean(), nullable=False),
         sa.Column("benchmark_used", sa.String(length=200), nullable=True),
-        sa.Column("conflicting_project_id", sa.Integer(), sa.ForeignKey("projects.id"), nullable=True),
+        sa.Column(
+            "conflicting_project_id", sa.Integer(), sa.ForeignKey("projects.id"), nullable=True
+        ),
         sa.Column("demand_summary", sa.Text(), nullable=True),
         sa.Column("gap_summary", sa.Text(), nullable=True),
         sa.Column("recommendation_summary", sa.Text(), nullable=True),

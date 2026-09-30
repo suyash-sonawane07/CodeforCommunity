@@ -43,7 +43,9 @@ def seed() -> None:
             return
 
         # --- 1. Dataset registry ------------------------------------------------
-        ds_demo = db.query(PublicDataset).filter(PublicDataset.name == "civicpulse_demo_seed").first()
+        ds_demo = (
+            db.query(PublicDataset).filter(PublicDataset.name == "civicpulse_demo_seed").first()
+        )
         if not ds_demo:
             ds_demo = PublicDataset(
                 name="civicpulse_demo_seed",
@@ -120,7 +122,12 @@ def seed() -> None:
         db.flush()
 
         # --- 4. Demographics ----------------------------------------------------
-        if db.query(DemographicIndicator).filter(DemographicIndicator.location_id == town2.id).count() == 0:
+        if (
+            db.query(DemographicIndicator)
+            .filter(DemographicIndicator.location_id == town2.id)
+            .count()
+            == 0
+        ):
             db.add(
                 DemographicIndicator(
                     location_id=town2.id,
@@ -132,7 +139,9 @@ def seed() -> None:
             )
 
         # --- 5. Infrastructure Assets -------------------------------------------
-        school = db.query(InfrastructureAsset).filter(InfrastructureAsset.asset_type == "school").first()
+        school = (
+            db.query(InfrastructureAsset).filter(InfrastructureAsset.asset_type == "school").first()
+        )
         if not school:
             db.add(
                 InfrastructureAsset(
@@ -144,7 +153,11 @@ def seed() -> None:
                 )
             )
 
-        water_point = db.query(InfrastructureAsset).filter(InfrastructureAsset.asset_type == "water_point").first()
+        water_point = (
+            db.query(InfrastructureAsset)
+            .filter(InfrastructureAsset.asset_type == "water_point")
+            .first()
+        )
         if not water_point:
             db.add(
                 InfrastructureAsset(
@@ -226,13 +239,25 @@ def seed() -> None:
                 transcript="Water supply comes only two hours a week.",
             )
         )
-        db.add_all([
-            ExtractedEntity(request_id=req1.id, entity_type="facility", value="bus_stop", confidence=0.88),
-            ExtractedEntity(request_id=req1.id, entity_type="time", value="after 5 pm", confidence=0.90),
-            ExtractedEntity(request_id=req2.id, entity_type="facility", value="school", confidence=0.92),
-            ExtractedEntity(request_id=req2.id, entity_type="facility", value="toilet", confidence=0.95),
-            ExtractedEntity(request_id=req3.id, entity_type="facility", value="water_point", confidence=0.85),
-        ])
+        db.add_all(
+            [
+                ExtractedEntity(
+                    request_id=req1.id, entity_type="facility", value="bus_stop", confidence=0.88
+                ),
+                ExtractedEntity(
+                    request_id=req1.id, entity_type="time", value="after 5 pm", confidence=0.90
+                ),
+                ExtractedEntity(
+                    request_id=req2.id, entity_type="facility", value="school", confidence=0.92
+                ),
+                ExtractedEntity(
+                    request_id=req2.id, entity_type="facility", value="toilet", confidence=0.95
+                ),
+                ExtractedEntity(
+                    request_id=req3.id, entity_type="facility", value="water_point", confidence=0.85
+                ),
+            ]
+        )
 
         # --- 8. Needs Clusters & Members ----------------------------------------
         # Cluster 1: Transport Access (Demo Village 1)
@@ -256,7 +281,11 @@ def seed() -> None:
             cl1.independent_demand_count = 7
             cl1.raw_message_count = 12
 
-        db.add(ClusterMember(cluster_id=cl1.id, request_id=req1.id, similarity_score=0.92, assignment="auto"))
+        db.add(
+            ClusterMember(
+                cluster_id=cl1.id, request_id=req1.id, similarity_score=0.92, assignment="auto"
+            )
+        )
 
         # Cluster 2: Education Sanitation (Demo Village 1)
         cl2 = NeedsCluster(
@@ -271,7 +300,11 @@ def seed() -> None:
         )
         db.add(cl2)
         db.flush()
-        db.add(ClusterMember(cluster_id=cl2.id, request_id=req2.id, similarity_score=0.95, assignment="auto"))
+        db.add(
+            ClusterMember(
+                cluster_id=cl2.id, request_id=req2.id, similarity_score=0.95, assignment="auto"
+            )
+        )
 
         # Cluster 3: Water Supply (Demo Town 2)
         cl3 = NeedsCluster(
@@ -286,7 +319,11 @@ def seed() -> None:
         )
         db.add(cl3)
         db.flush()
-        db.add(ClusterMember(cluster_id=cl3.id, request_id=req3.id, similarity_score=0.89, assignment="auto"))
+        db.add(
+            ClusterMember(
+                cluster_id=cl3.id, request_id=req3.id, similarity_score=0.89, assignment="auto"
+            )
+        )
 
         # Cluster 4: Roads (Unresolved location)
         cl4 = NeedsCluster(
@@ -301,7 +338,11 @@ def seed() -> None:
         )
         db.add(cl4)
         db.flush()
-        db.add(ClusterMember(cluster_id=cl4.id, request_id=req4.id, similarity_score=1.0, assignment="auto"))
+        db.add(
+            ClusterMember(
+                cluster_id=cl4.id, request_id=req4.id, similarity_score=1.0, assignment="auto"
+            )
+        )
 
         # --- 9. Evidence & Gap Analysis Records ---------------------------------
         for cl in [cl1, cl2, cl3]:
@@ -313,7 +354,9 @@ def seed() -> None:
                     demand_summary=f"{cl.independent_demand_count} verified citizen reports indicating unmet service.",
                     gap_summary="Nearest functional facility is outside standard service distance.",
                     recommendation_summary=f"Recommend capital allocation for {cl.issue_type} enhancement.",
-                    uncertainty_notes=["Synthetically verified against public infrastructure layer."],
+                    uncertainty_notes=[
+                        "Synthetically verified against public infrastructure layer."
+                    ],
                 )
             )
             db.add(
@@ -361,7 +404,9 @@ def seed() -> None:
 
         db.commit()
         print("Comprehensive seed completed successfully!")
-        print("Seeded: 4 users, 3 locations, 4 citizen requests (hi, mr, en), 4 clusters, assets, projects, gap analyses, evidence, and audit logs.")
+        print(
+            "Seeded: 4 users, 3 locations, 4 citizen requests (hi, mr, en), 4 clusters, assets, projects, gap analyses, evidence, and audit logs."
+        )
     except Exception:
         db.rollback()
         raise

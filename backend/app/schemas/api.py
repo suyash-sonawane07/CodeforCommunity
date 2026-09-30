@@ -59,7 +59,7 @@ class LoginResponse(BaseModel):
 
 class RequestCreate(BaseModel):
     channel: str = Field(pattern="^(text|voice)$")
-    language_hint: Optional[str] = Field(default=None, pattern="^(hi|mr|en)$")
+    language_hint: Optional[str] = Field(default=None, pattern="^(hi|mr|en|pt|ru|zh|zu|af)$")
     text: Optional[str] = None
     location_text: Optional[str] = None
     audio_base64: Optional[str] = None
@@ -80,6 +80,8 @@ class RequestCreateResponse(BaseModel):
     request_id: str
     status: str
     reference_code: str
+    issue_type: Optional[str] = None
+    location: Optional[str] = None
 
 
 class AudioUploadResponse(BaseModel):
@@ -95,6 +97,8 @@ class RequestStatusResponse(BaseModel):
     language: Optional[str] = None
     transcript: Optional[str] = None
     created_at: Optional[str] = None
+    issue_type: Optional[str] = None
+    location: Optional[str] = None
 
 
 # ---------------------------------------------------------------- clusters
@@ -226,9 +230,7 @@ class OutcomeResponse(BaseModel):
     baseline: Optional[dict[str, Any]] = None
     followup: Optional[dict[str, Any]] = None
     is_synthetic: bool = True  # FR-057
-    disclaimer: str = Field(
-        default="Observed change, not proven causal impact (FR-067)"
-    )
+    disclaimer: str = Field(default="Observed change, not proven causal impact (FR-067)")
 
 
 # ---------------------------------------------------------------- datasets / audit

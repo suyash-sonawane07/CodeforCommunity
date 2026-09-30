@@ -26,9 +26,7 @@ router = APIRouter(prefix="/requests", tags=["requests"])
     status_code=status.HTTP_201_CREATED,
     summary="Submit a citizen request (text or voice) — FR-001/002",
 )
-def create_request(
-    body: RequestCreate, db: Session = Depends(get_db)
-) -> RequestCreateResponse:
+def create_request(body: RequestCreate, db: Session = Depends(get_db)) -> RequestCreateResponse:
     """Intake endpoint: runs STT, language detection, classification, NER, geocoding and clustering."""
     # 1. AI processing pipeline
     processed = process_citizen_request(
@@ -44,8 +42,18 @@ def create_request(
 
     # 2. Location persistence
     loc_id = None
+    resolved_location_name = None
     if processed.location_resolved or body.location_text:
         admin = processed.admin_hierarchy or {}
+        resolved_location_name = (
+            admin.get("village_ward") or admin.get("district") or body.location_text
+        )
+        if not resolved_location_name and processed.entities:
+            for ent in processed.entities:
+                if ent.get("entity_type") in ("location", "place", "facility"):
+                    resolved_location_name = ent.get("value")
+                    break
+
         loc = req_repo.create_or_get_location(
             source_text=body.location_text or processed.raw_text,
             latitude=processed.latitude,
@@ -53,9 +61,11 @@ def create_request(
             state=admin.get("state", "Demo State"),
             district=admin.get("district", "Demo District 1"),
             block=admin.get("block", "Demo Block A"),
-            village_ward=admin.get("village_ward", body.location_text),
+            village_ward=resolved_location_name,
             confidence=0.85 if processed.location_resolved else 0.3,
-            resolution_method="gazetteer_exact" if processed.location_resolved else "unresolved_text",
+            resolution_method="gazetteer_exact"
+            if processed.location_resolved
+            else "unresolved_text",
             status="resolved" if processed.location_resolved else "location_unresolved",
         )
         loc_id = loc.id
@@ -67,7 +77,7 @@ def create_request(
         raw_text=body.text or processed.raw_text,
         language=processed.language,
         transcript=processed.transcript,
-        status="processing",
+        status="processed",
         uncertainty_notes=processed.uncertainty_notes,
     )
 
@@ -108,6 +118,8 @@ def create_request(
         request_id=f"req_{req.id}",
         status=req.status,
         reference_code=req.reference_code,
+        issue_type=processed.issue_type,
+        location=resolved_location_name or body.location_text,
     )
 
 
@@ -135,7 +147,12 @@ def upload_audio(
     if not any(t in content_type for t in ["audio", "video", "octet-stream"]):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"error": {"code": "INVALID_AUDIO", "message": "Uploaded file is not a supported audio format"}},
+            detail={
+                "error": {
+                    "code": "INVALID_AUDIO",
+                    "message": "Uploaded file is not a supported audio format",
+                }
+            },
         )
 
     file_name = f"audio_{uuid.uuid4().hex[:8]}_{audio.filename or 'recording.wav'}"
@@ -165,9 +182,7 @@ def upload_audio(
     response_model=RequestStatusResponse,
     summary="Citizen checks own submission status (reference ID) — FR-005",
 )
-def get_request(
-    request_id: str, db: Session = Depends(get_db)
-) -> RequestStatusResponse:
+def get_request(request_id: str, db: Session = Depends(get_db)) -> RequestStatusResponse:
     """Look up submission status by reference code or ID."""
     req_repo = RequestRepository(db)
     req = req_repo.get_by_id_or_reference(request_id)
@@ -177,6 +192,32 @@ def get_request(
             detail={"error": {"code": "NOT_FOUND", "message": f"Request {request_id} not found"}},
         )
 
+    # Resolve issue_type and location from cluster or entities
+    issue_type = None
+    location_name = None
+
+    from app.models import ClusterMember, ExtractedEntity, Location
+
+    member = db.query(ClusterMember).filter(ClusterMember.request_id == req.id).first()
+    if member and member.cluster:
+        issue_type = member.cluster.issue_type
+        if member.cluster.location_id:
+            loc = db.query(Location).filter(Location.id == member.cluster.location_id).first()
+            if loc:
+                location_name = loc.village_ward or loc.district or loc.source_text
+
+    if not location_name:
+        loc_ent = (
+            db.query(ExtractedEntity)
+            .filter(
+                ExtractedEntity.request_id == req.id,
+                ExtractedEntity.entity_type.in_(["location", "place", "facility"]),
+            )
+            .first()
+        )
+        if loc_ent:
+            location_name = loc_ent.value
+
     return RequestStatusResponse(
         request_id=f"req_{req.id}",
         reference_code=req.reference_code,
@@ -184,4 +225,6 @@ def get_request(
         language=req.language,
         transcript=req.transcript or req.raw_text,
         created_at=req.created_at.isoformat() if req.created_at else None,
+        issue_type=issue_type,
+        location=location_name,
     )

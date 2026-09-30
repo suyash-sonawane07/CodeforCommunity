@@ -31,9 +31,7 @@ class NeedsCluster(Base, TimestampMixin):
     uncertainty_notes: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)  # §25
     dataset_version: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
 
-    members: Mapped[List["ClusterMember"]] = relationship(
-        "ClusterMember", back_populates="cluster"
-    )
+    members: Mapped[List["ClusterMember"]] = relationship("ClusterMember", back_populates="cluster")
 
 
 class ClusterMember(Base, TimestampMixin):

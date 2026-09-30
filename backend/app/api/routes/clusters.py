@@ -156,7 +156,7 @@ def correct_cluster(
     reviewer_user = db.query(User).filter(User.email == user.get("subject")).first()
     reviewer_id = reviewer_user.id if reviewer_user else None
 
-    action_record = gov_repo.record_review_action(
+    gov_repo.record_review_action(
         cluster_id=cluster_id,
         reviewer_id=reviewer_id,
         action="correction",
@@ -228,7 +228,7 @@ def review_cluster(
     reviewer_user = db.query(User).filter(User.email == user.get("subject")).first()
     reviewer_id = reviewer_user.id if reviewer_user else None
 
-    action_record = gov_repo.record_review_action(
+    gov_repo.record_review_action(
         cluster_id=cluster_id,
         reviewer_id=reviewer_id,
         action=body.action,
@@ -285,9 +285,15 @@ def get_gap_analysis(
     conflicting = None
     if out.conflicting_project_id:
         from app.models import Project
+
         proj = db.query(Project).filter(Project.id == out.conflicting_project_id).first()
         if proj:
-            conflicting = {"id": proj.id, "name": proj.name, "sector": proj.sector, "status": proj.status}
+            conflicting = {
+                "id": proj.id,
+                "name": proj.name,
+                "sector": proj.sector,
+                "status": proj.status,
+            }
 
     return GapAnalysisResult(
         cluster_id=cluster_id,

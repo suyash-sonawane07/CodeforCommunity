@@ -1,14 +1,11 @@
 """Tests for multilingual rule-based NLP, geocoding and embeddings."""
 
-import pytest
-
 from ai.embeddings import RuleBasedEmbeddingProvider
 from ai.geocoding import GazetteerGeocoder
 from ai.nlp import (
     RuleBasedEntityExtractor,
     RuleBasedIssueClassifier,
     RuleBasedLanguageDetector,
-    RuleBasedTextNormalizer,
 )
 
 

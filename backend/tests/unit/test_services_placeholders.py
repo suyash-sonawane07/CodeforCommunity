@@ -1,6 +1,5 @@
 """Deterministic service boundaries tests — verifying typed inputs, outputs, and behaviors."""
 
-
 from app.services.clustering import ClusteringInput, ClusteringOutput, cluster_requests
 from app.services.evidence import EvidenceInput, EvidenceOutput, build_evidence_panel
 from app.services.gap_detection import GapDetectionInput, GapDetectionOutput, detect_gap
@@ -61,11 +60,7 @@ def test_evidence_service():
 
 
 def test_simulation_service():
-    res = run_scenario(
-        SimulationInput(
-            sector_allocations={"roads": 5000000.0, "water": 2000000.0}
-        )
-    )
+    res = run_scenario(SimulationInput(sector_allocations={"roads": 5000000.0, "water": 2000000.0}))
     assert isinstance(res, SimulationOutput)
     assert res.coverable_clusters_before is not None
     assert res.coverable_clusters_after is not None

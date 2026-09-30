@@ -50,9 +50,7 @@ def resolve_location(payload: GeoResolutionInput) -> GeoResolutionOutput:
     )
 
 
-def nearest_infrastructure(
-    latitude: float, longitude: float, asset_type: str, db=None
-) -> dict:
+def nearest_infrastructure(latitude: float, longitude: float, asset_type: str, db=None) -> dict:
     """Finds the nearest infrastructure asset of the given type and computes distance in km."""
     if db is None:
         # Default mock distance for testing without session

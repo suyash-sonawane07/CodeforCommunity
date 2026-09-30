@@ -13,37 +13,50 @@ from typing import Any, Callable
 STT_PROVIDERS: dict[str, Callable[[], Any]] = {
     "mock": lambda: _stt().MockSTTProvider(),
     "whisper": lambda: _stt().WhisperSTTProvider(),
+    "gemini": lambda: _stt().GeminiSTTProvider(),
+    "groq": lambda: _stt().GroqWhisperSTTProvider(),
 }
 
 LANGUAGE_PROVIDERS: dict[str, Callable[[], Any]] = {
     "mock": lambda: _nlp().MockLanguageDetector(),
     "rule_based": lambda: _nlp().RuleBasedLanguageDetector(),
+    "gemini": lambda: _nlp().GeminiNLPProvider(),
+    "openai": lambda: _nlp().OpenAINLPProvider(),
 }
 
 LLM_PROVIDERS: dict[str, Callable[[], Any]] = {
-    "mock": lambda: _nlp().MockTextNormalizer(),  # LLM choice TBD (PRD §11)
+    "mock": lambda: _nlp().MockTextNormalizer(),
     "rule_based": lambda: _nlp().RuleBasedTextNormalizer(),
+    "gemini": lambda: _nlp().GeminiNLPProvider(),
+    "openai": lambda: _nlp().OpenAINLPProvider(),
 }
 
 EMBEDDING_PROVIDERS: dict[str, Callable[[], Any]] = {
     "mock": lambda: _emb().MockEmbeddingProvider(),
     "tfidf": lambda: _emb().TfidfEmbeddingProvider(),
     "rule_based": lambda: _emb().RuleBasedEmbeddingProvider(),
+    "gemini": lambda: _emb().GeminiEmbeddingProvider(),
+    "openai": lambda: _emb().OpenAIEmbeddingProvider(),
 }
 
 GEOCODING_PROVIDERS: dict[str, Callable[[], Any]] = {
     "mock": lambda: _geo().MockGeocoder(),
     "gazetteer": lambda: _geo().GazetteerGeocoder(),
     "nominatim": lambda: _geo().NominatimGeocoder(),
+    "composite": lambda: _geo().CompositeGeocoder(),
 }
 
 _CLASSIFIER_FACTORIES = {
     "mock": lambda: _nlp().MockIssueClassifier(),
     "rule_based": lambda: _nlp().RuleBasedIssueClassifier(),
+    "gemini": lambda: _nlp().GeminiNLPProvider(),
+    "openai": lambda: _nlp().OpenAINLPProvider(),
 }
 _EXTRACTOR_FACTORIES = {
     "mock": lambda: _nlp().MockEntityExtractor(),
     "rule_based": lambda: _nlp().RuleBasedEntityExtractor(),
+    "gemini": lambda: _nlp().GeminiNLPProvider(),
+    "openai": lambda: _nlp().OpenAINLPProvider(),
 }
 
 
@@ -74,9 +87,7 @@ def _geo():
 def _resolve(registry: dict, env_value: str, kind: str):
     factory = registry.get(env_value)
     if factory is None:
-        raise ValueError(
-            f"Unknown {kind} provider '{env_value}'. Available: {sorted(registry)}"
-        )
+        raise ValueError(f"Unknown {kind} provider '{env_value}'. Available: {sorted(registry)}")
     return factory()
 
 

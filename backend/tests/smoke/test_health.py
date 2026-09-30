@@ -83,4 +83,3 @@ def test_business_endpoints_return_valid_evidence_panel():
     assert "independent_demand_count" in body
     assert "priority_factors" in body
     assert "uncertainty_notes" in body
-

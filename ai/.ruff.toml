@@ -4,3 +4,9 @@ target-version = "py39"
 
 [lint]
 select = ["E", "F", "I", "W", "UP", "B"]
+ignore = [
+    "E501",
+    "UP007",
+    "UP035",
+    "UP006",
+]

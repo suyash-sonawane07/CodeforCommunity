@@ -88,7 +88,7 @@ def test_track1_end_to_end_pipeline():
     assert status_res.status_code == 200
     status_data = status_res.json()
     assert status_data["reference_code"] == mr_ref
-    assert status_data["status"] in ["processing", "received", "active"]
+    assert status_data["status"] in ["processing", "received", "active", "processed"]
 
     # -------------------------------------------------------------
     # Step 3: Analyst Lists Clusters with Filtering

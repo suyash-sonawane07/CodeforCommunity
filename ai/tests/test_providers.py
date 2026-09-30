@@ -4,7 +4,6 @@ These verify the SCAFFOLD (interfaces resolve, mocks are deterministic and
 honest about being mocks). No real AI capability is asserted.
 """
 
-import os
 import sys
 from pathlib import Path
 
@@ -83,9 +82,13 @@ def test_embedding_mock_is_fixed_size_and_deterministic():
     assert v1 == v2 and len(v1) == 8
 
 
-def test_tfidf_embedding_is_placeholder():
-    with pytest.raises(NotImplementedError):
-        TfidfEmbeddingProvider().embed("x")
+def test_tfidf_embedding_conforms_and_embeds():
+    p = TfidfEmbeddingProvider()
+    assert isinstance(p, EmbeddingProvider)
+    res = p.embed("drinking water pipeline broken")
+    assert len(res.vector) == 64
+    assert res.confidence is not None
+    assert any(x != 0.0 for x in res.vector)
 
 
 def test_geocoder_mock_never_resolves():
@@ -97,7 +100,12 @@ def test_geocoder_mock_never_resolves():
 
 
 def test_registry_resolves_mocks_by_default(monkeypatch):
-    for var in ("AI_STT_PROVIDER", "AI_LLM_PROVIDER", "AI_EMBEDDING_PROVIDER", "GEOCODING_PROVIDER"):
+    for var in (
+        "AI_STT_PROVIDER",
+        "AI_LLM_PROVIDER",
+        "AI_EMBEDDING_PROVIDER",
+        "GEOCODING_PROVIDER",
+    ):
         monkeypatch.delenv(var, raising=False)
     assert isinstance(get_stt_provider(), MockSTTProvider)
     assert isinstance(get_language_detector(), MockLanguageDetector)

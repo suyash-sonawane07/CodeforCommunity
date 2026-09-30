@@ -96,9 +96,7 @@ def detect_gap(payload: GapDetectionInput, db=None) -> GapDetectionOutput:
             ),
             recommendation_summary="Avoid duplicate allocation; monitor progress of active project.",
             conflicting_project_id=conflicting_project_id,
-            uncertainty_notes=[
-                f"Conflicting project '{conflicting_project.name}' found (FR-042)."
-            ],
+            uncertainty_notes=[f"Conflicting project '{conflicting_project.name}' found (FR-042)."],
         )
 
     # Gap is confirmed

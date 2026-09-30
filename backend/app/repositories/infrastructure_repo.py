@@ -20,17 +20,17 @@ class InfrastructureRepository:
         if asset_type:
             query = query.filter(InfrastructureAsset.asset_type == asset_type)
         if district:
-            query = query.join(Location, InfrastructureAsset.location_id == Location.id, isouter=True).filter(
-                Location.district.ilike(f"%{district}%")
-            )
+            query = query.join(
+                Location, InfrastructureAsset.location_id == Location.id, isouter=True
+            ).filter(Location.district.ilike(f"%{district}%"))
         return query.all()
 
     def list_demographics(self, district: Optional[str] = None) -> list[DemographicIndicator]:
         query = self.db.query(DemographicIndicator)
         if district:
-            query = query.join(Location, DemographicIndicator.location_id == Location.id, isouter=True).filter(
-                Location.district.ilike(f"%{district}%")
-            )
+            query = query.join(
+                Location, DemographicIndicator.location_id == Location.id, isouter=True
+            ).filter(Location.district.ilike(f"%{district}%"))
         return query.all()
 
     def find_conflicting_project(

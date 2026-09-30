@@ -31,18 +31,29 @@ def test_postgis_extension_available():
 
 def test_all_prd_tables_exist():
     expected = {
-        "users", "citizen_requests", "request_transcriptions", "extracted_entities",
-        "locations", "needs_clusters", "cluster_members", "infrastructure_assets",
-        "demographic_indicators", "public_datasets", "projects", "gap_analyses",
-        "priority_factors", "evidence_records", "simulation_scenarios",
-        "review_actions", "interventions", "audit_logs",
+        "users",
+        "citizen_requests",
+        "request_transcriptions",
+        "extracted_entities",
+        "locations",
+        "needs_clusters",
+        "cluster_members",
+        "infrastructure_assets",
+        "demographic_indicators",
+        "public_datasets",
+        "projects",
+        "gap_analyses",
+        "priority_factors",
+        "evidence_records",
+        "simulation_scenarios",
+        "review_actions",
+        "interventions",
+        "audit_logs",
     }
     with engine.connect() as conn:
         present = {
             r[0]
-            for r in conn.execute(
-                text("SELECT tablename FROM pg_tables WHERE schemaname='public'")
-            )
+            for r in conn.execute(text("SELECT tablename FROM pg_tables WHERE schemaname='public'"))
         }
     missing = expected - present
     assert not missing, f"tables missing (run migrations): {missing}"

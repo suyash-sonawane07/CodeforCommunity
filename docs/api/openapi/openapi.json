@@ -1864,7 +1864,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^(hi|mr|en)$"
+                "pattern": "^(hi|mr|en|pt|ru|zh|zu|af)$"
               },
               {
                 "type": "null"
@@ -1930,6 +1930,28 @@
           "reference_code": {
             "type": "string",
             "title": "Reference Code"
+          },
+          "issue_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issue Type"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
           }
         },
         "type": "object",
@@ -1986,6 +2008,28 @@
               }
             ],
             "title": "Created At"
+          },
+          "issue_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issue Type"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
           }
         },
         "type": "object",
