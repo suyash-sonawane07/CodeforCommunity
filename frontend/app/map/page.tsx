@@ -107,24 +107,25 @@ export default function DemandMapPage() {
     const sector = String(props.issue_type || "").toLowerCase();
     const district = String(props.district || "").toLowerCase();
     const ward = String(props.village_ward || "").toLowerCase();
+    const country = String(props.country || "").toLowerCase();
 
     if (sectorFilter !== "all" && !sector.includes(sectorFilter)) return false;
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      if (!district.includes(q) && !ward.includes(q) && !sector.includes(q)) {
+      if (!district.includes(q) && !ward.includes(q) && !sector.includes(q) && !country.includes(q)) {
         return false;
       }
     }
 
     if (regionFilter === "india") {
-      return district.includes("pune") || district.includes("chhatrapati") || district.includes("sambhajinagar");
+      return country === "india" || district.includes("pune") || district.includes("chhatrapati") || district.includes("sambhajinagar");
     }
     if (regionFilter === "brazil") {
-      return district.includes("rio") || district.includes("santos") || district.includes("zona norte");
+      return country === "brazil" || district.includes("rio") || district.includes("santos") || district.includes("zona norte") || district.includes("morros");
     }
     if (regionFilter === "south_africa") {
-      return district.includes("johannesburg") || district.includes("cape") || district.includes("khayelitsha") || district.includes("region d");
+      return country === "south_africa" || district.includes("johannesburg") || district.includes("cape") || district.includes("khayelitsha") || district.includes("region") || ward.includes("soweto") || ward.includes("lenasia");
     }
     return true;
   });
@@ -138,7 +139,7 @@ export default function DemandMapPage() {
       setMapCenter([-22.859, -43.245]);
       setMapZoom(12);
     } else if (rId === "south_africa") {
-      setMapCenter([-26.271, 27.859]);
+      setMapCenter([-26.265, 27.855]);
       setMapZoom(12);
     } else {
       setMapCenter([10, 20]);
@@ -187,6 +188,7 @@ export default function DemandMapPage() {
         <div className="absolute inset-0 z-0">
           <InteractiveMap
             features={filteredFeatures}
+            infrastructure={infrastructure}
             selectedFeature={selectedFeature}
             onSelectFeature={(feat: any) => {
               setSelectedFeature(feat);

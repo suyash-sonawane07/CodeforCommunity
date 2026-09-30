@@ -8,6 +8,7 @@ import L from 'leaflet';
 interface MapComponentProps {
   features?: any[];
   clusters?: any[];
+  infrastructure?: any[];
   selectedFeature?: any;
   onSelectFeature?: (feat: any) => void;
   mapType?: 'map' | 'satellite' | 'terrain';
@@ -20,7 +21,7 @@ interface MapComponentProps {
 function MapController({ center, zoom }: { center: [number, number]; zoom: number }) {
   const map = useMap();
   useEffect(() => {
-    map.flyTo(center, zoom, { duration: 1.5 });
+    map.flyTo(center, zoom, { duration: 1.2 });
   }, [center, zoom, map]);
   return null;
 }
@@ -29,8 +30,8 @@ function MapController({ center, zoom }: { center: [number, number]; zoom: numbe
 function createCustomPin(icon: string, color: string, isSelected: boolean) {
   const html = `
     <div style="position: relative; display: flex; flex-direction: column; align-items: center; cursor: pointer; transform: ${isSelected ? 'scale(1.25)' : 'scale(1)'}; transition: transform 0.2s;">
-      ${isSelected ? `<div style="position: absolute; top: -6px; width: 44px; height: 44px; border-radius: 9999px; border: 2px solid #1a73e8; background: rgba(26,115,232,0.2); animation: ping 1.5s cubic-bezier(0,0,0.2,1) infinite;"></div>` : ''}
-      <svg viewBox="0 0 384 512" style="width: 32px; height: 42px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));">
+      ${isSelected ? `<div style="position: absolute; top: -6px; width: 44px; height: 44px; border-radius: 9999px; border: 2px solid #1a73e8; background: rgba(26,115,232,0.25); animation: ping 1.5s cubic-bezier(0,0,0.2,1) infinite;"></div>` : ''}
+      <svg viewBox="0 0 384 512" style="width: 32px; height: 42px; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.4));">
         <path fill="${color}" d="M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67-9.535 13.774-29.93 13.773-39.464 0z"/>
         <circle cx="192" cy="192" r="100" fill="#ffffff" />
       </svg>
@@ -46,9 +47,26 @@ function createCustomPin(icon: string, color: string, isSelected: boolean) {
   });
 }
 
+// Helper to create municipal infrastructure facility pins (square badge)
+function createInfraPin(icon: string, color: string) {
+  const html = `
+    <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: #ffffff; border: 2px solid ${color}; box-shadow: 0 2px 6px rgba(0,0,0,0.25); cursor: pointer;">
+      <span style="font-size: 14px;">${icon}</span>
+    </div>
+  `;
+  return L.divIcon({
+    html,
+    className: 'custom-infra-marker',
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -16],
+  });
+}
+
 export default function MapComponent({
   features = [],
   clusters = [],
+  infrastructure = [],
   selectedFeature,
   onSelectFeature,
   mapType = 'map',
@@ -210,6 +228,55 @@ export default function MapComponent({
             </React.Fragment>
           );
         })}
+
+        {/* ----------------------------------------------------------- Existing Municipal Infrastructure Facilities */}
+        {showInfra &&
+          infrastructure.map((fac: any, idx: number) => {
+            const lat = fac.lat || fac.location?.coordinates?.[1];
+            const lng = fac.lng || fac.location?.coordinates?.[0];
+            if (lat === undefined || lng === undefined) return null;
+
+            const type = (fac.type || '').toLowerCase();
+            let facIcon = '🏢';
+            let facColor = '#5f6368';
+            if (type.includes('water')) {
+              facIcon = '💧';
+              facColor = '#1a73e8';
+            } else if (type.includes('drainage') || type.includes('basin')) {
+              facIcon = '🌊';
+              facColor = '#0b57d0';
+            } else if (type.includes('power') || type.includes('substation') || type.includes('electric')) {
+              facIcon = '⚡';
+              facColor = '#e37400';
+            } else if (type.includes('health') || type.includes('clinic')) {
+              facIcon = '🏥';
+              facColor = '#137333';
+            }
+
+            return (
+              <Marker
+                key={`infra-${fac.id || idx}`}
+                position={[lat, lng]}
+                icon={createInfraPin(facIcon, facColor)}
+              >
+                <Popup>
+                  <div style={{ minWidth: '170px', fontFamily: 'system-ui, sans-serif' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '15px' }}>{facIcon}</span>
+                      <strong style={{ fontSize: '12px', color: '#1f1f1f' }}>{fac.name}</strong>
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#5f6368', lineHeight: '1.4' }}>
+                      <div>Type: <b style={{ color: '#1f1f1f' }}>{fac.type?.replace(/_/g, ' ')}</b></div>
+                      <div>Status: <span style={{ color: facColor, fontWeight: 600 }}>{fac.status?.replace(/_/g, ' ')}</span></div>
+                      {fac.capacity_pct && (
+                        <div>Capacity Load: <b>{fac.capacity_pct}%</b></div>
+                      )}
+                    </div>
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
       </MapContainer>
     </div>
   );
