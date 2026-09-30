@@ -100,6 +100,76 @@ class GazetteerGeocoder:
                 "village_ward": "Pune",
             },
         },
+        "paithan": {
+            "latitude": 19.479,
+            "longitude": 75.383,
+            "admin_hierarchy": {
+                "state": "Maharashtra",
+                "district": "Chhatrapati Sambhajinagar",
+                "block": "Paithan",
+                "village_ward": "Paithan Rural Hub",
+            },
+        },
+        "shirur": {
+            "latitude": 18.825,
+            "longitude": 74.378,
+            "admin_hierarchy": {
+                "state": "Maharashtra",
+                "district": "Pune",
+                "block": "Shirur",
+                "village_ward": "Shirur Rural Ward",
+            },
+        },
+        "favela da maré": {
+            "latitude": -22.861,
+            "longitude": -43.245,
+            "admin_hierarchy": {
+                "state": "Rio de Janeiro",
+                "district": "Zona Norte",
+                "block": "Complexo da Maré",
+                "village_ward": "Favela da Maré",
+            },
+        },
+        "maré": {
+            "latitude": -22.861,
+            "longitude": -43.245,
+            "admin_hierarchy": {
+                "state": "Rio de Janeiro",
+                "district": "Zona Norte",
+                "block": "Complexo da Maré",
+                "village_ward": "Favela da Maré",
+            },
+        },
+        "santos": {
+            "latitude": -23.953,
+            "longitude": -46.332,
+            "admin_hierarchy": {
+                "state": "São Paulo",
+                "district": "Baixada Santista",
+                "block": "Morros",
+                "village_ward": "Santos Encosta",
+            },
+        },
+        "soweto": {
+            "latitude": -26.267,
+            "longitude": 27.858,
+            "admin_hierarchy": {
+                "state": "Gauteng",
+                "district": "City of Johannesburg",
+                "block": "Region D",
+                "village_ward": "Soweto Ward 42",
+            },
+        },
+        "khayelitsha": {
+            "latitude": -34.038,
+            "longitude": 18.665,
+            "admin_hierarchy": {
+                "state": "Western Cape",
+                "district": "City of Cape Town",
+                "block": "Khayelitsha",
+                "village_ward": "Khayelitsha Site C",
+            },
+        },
     }
 
     def __init__(self, entries: dict | None = None) -> None:

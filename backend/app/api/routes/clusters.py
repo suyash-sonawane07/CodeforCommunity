@@ -301,9 +301,11 @@ def get_gap_analysis(
         demand_summary=out.demand_summary,
         gap_summary=out.gap_summary,
         recommendation_summary=out.recommendation_summary,
-        benchmark_used="National Infrastructure Service Radius Standards",
+        benchmark_used=out.benchmark_used or "National Infrastructure Service Radius Standards",
         conflicting_project=conflicting,
         uncertainty_notes=out.uncertainty_notes,
+        evidence_request_ids=out.evidence_request_ids,
+        evidence_reference_codes=out.evidence_reference_codes,
     )
 
 
@@ -317,7 +319,7 @@ def get_priority(
     db: Session = Depends(get_db),
     user=Depends(require_role("analyst")),
 ) -> PriorityBreakdown:
-    weights = {"demand": 0.25, "gap": 0.25, "impact": 0.25, "equity": 0.25}
+    weights = {"demand": 0.25, "gap": 0.25, "impact": 0.25, "equity": 0.25, "funded_penalty": 0.50}
     out = compute_priority(PrioritisationInput(cluster_id=cluster_id, weights=weights), db=db)
     return PriorityBreakdown(
         cluster_id=cluster_id,
@@ -325,7 +327,9 @@ def get_priority(
         gap=out.gap,
         impact=out.impact,
         equity_adjustment=out.equity_adjustment,
+        funded_penalty=out.funded_penalty,
         weights=weights,
         priority_index=out.priority_index,
         is_incomplete=out.is_incomplete,
+        evidence_request_ids=out.evidence_request_ids,
     )

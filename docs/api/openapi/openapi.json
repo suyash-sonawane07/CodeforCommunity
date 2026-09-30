@@ -1482,6 +1482,20 @@
             },
             "type": "array",
             "title": "Dataset Versions"
+          },
+          "evidence_request_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Evidence Request Ids"
+          },
+          "evidence_reference_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence Reference Codes"
           }
         },
         "type": "object",
@@ -1572,6 +1586,20 @@
             },
             "type": "array",
             "title": "Uncertainty Notes"
+          },
+          "evidence_request_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Evidence Request Ids"
+          },
+          "evidence_reference_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence Reference Codes"
           }
         },
         "type": "object",
@@ -1858,6 +1886,17 @@
             ],
             "title": "Equity Adjustment"
           },
+          "funded_penalty": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Funded Penalty"
+          },
           "weights": {
             "anyOf": [
               {
@@ -1887,6 +1926,13 @@
             "type": "boolean",
             "title": "Is Incomplete",
             "default": false
+          },
+          "evidence_request_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Evidence Request Ids"
           }
         },
         "type": "object",

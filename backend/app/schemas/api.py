@@ -158,6 +158,8 @@ class EvidencePanel(BaseModel):
     priority_factors: Optional[dict[str, Any]] = None
     uncertainty_notes: list[str] = Field(default_factory=list)
     dataset_versions: list[str] = Field(default_factory=list)
+    evidence_request_ids: list[int] = Field(default_factory=list)
+    evidence_reference_codes: list[str] = Field(default_factory=list)
 
 
 class GapAnalysisResult(BaseModel):
@@ -169,6 +171,8 @@ class GapAnalysisResult(BaseModel):
     benchmark_used: Optional[str] = None
     conflicting_project: Optional[dict[str, Any]] = None
     uncertainty_notes: list[str] = Field(default_factory=list)
+    evidence_request_ids: list[int] = Field(default_factory=list)
+    evidence_reference_codes: list[str] = Field(default_factory=list)
 
 
 class PriorityBreakdown(BaseModel):
@@ -177,9 +181,12 @@ class PriorityBreakdown(BaseModel):
     gap: Optional[float] = None
     impact: Optional[float] = None
     equity_adjustment: Optional[float] = None
+    funded_penalty: Optional[float] = None
     weights: Optional[dict[str, float]] = None
     priority_index: Optional[float] = None
     is_incomplete: bool = False  # FR-048
+    evidence_request_ids: list[int] = Field(default_factory=list)
+
 
 
 # ---------------------------------------------------------------- geospatial / infra
