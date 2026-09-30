@@ -72,12 +72,14 @@ jobs:
     defaults:
       run:
         working-directory: ai
+    env:
+      PYTHONPATH: ..
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.9"
-      - run: pip install pytest
+      - run: pip install pytest httpx
       - run: pytest -c pytest.ini
 
   data-validation:

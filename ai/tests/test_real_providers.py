@@ -7,7 +7,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+try:
+    import httpx  # noqa: F401
+except ImportError:
+    sys.modules["httpx"] = MagicMock()
 
 from ai.embeddings import (
     GeminiEmbeddingProvider,
